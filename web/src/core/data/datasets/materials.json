@@ -1,0 +1,59 @@
+[
+  {
+    "id": "aluminum_6061",
+    "category": "Aluminum",
+    "vc_range_m_min": [150, 300],
+    "fz_mm_per_tooth_by_diameter": {
+      "dia_3": [0.05, 0.10],
+      "dia_6": [0.08, 0.15],
+      "dia_10": [0.12, 0.20],
+      "dia_16": [0.15, 0.25],
+      "dia_20": [0.18, 0.30]
+    },
+    "force_coeff_kn_mm2": 0.8,
+    "specific_cutting_energy_j_mm3": 0.7,
+    "chip_thinning": {
+      "enable_below_fraction": 0.3,
+      "limit_factor": 2.0
+    },
+    "max_engagement_fraction": 0.8
+  },
+  {
+    "id": "steel_1045",
+    "category": "Carbon Steel",
+    "vc_range_m_min": [80, 150],
+    "fz_mm_per_tooth_by_diameter": {
+      "dia_3": [0.03, 0.08],
+      "dia_6": [0.05, 0.12],
+      "dia_10": [0.08, 0.16],
+      "dia_16": [0.10, 0.20],
+      "dia_20": [0.12, 0.24]
+    },
+    "force_coeff_kn_mm2": 2.5,
+    "specific_cutting_energy_j_mm3": 2.8,
+    "chip_thinning": {
+      "enable_below_fraction": 0.25,
+      "limit_factor": 1.8
+    },
+    "max_engagement_fraction": 0.6
+  },
+  {
+    "id": "stainless_316",
+    "category": "Stainless Steel",
+    "vc_range_m_min": [60, 120],
+    "fz_mm_per_tooth_by_diameter": {
+      "dia_3": [0.02, 0.06],
+      "dia_6": [0.04, 0.10],
+      "dia_10": [0.06, 0.14],
+      "dia_16": [0.08, 0.18],
+      "dia_20": [0.10, 0.22]
+    },
+    "force_coeff_kn_mm2": 3.2,
+    "specific_cutting_energy_j_mm3": 3.5,
+    "chip_thinning": {
+      "enable_below_fraction": 0.2,
+      "limit_factor": 1.5
+    },
+    "max_engagement_fraction": 0.5
+  }
+]

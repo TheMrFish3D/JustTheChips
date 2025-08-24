@@ -1,0 +1,32 @@
+[
+  {
+    "id": "haas_vf2",
+    "axis_max_feed_mm_min": 15000,
+    "rigidity_factor": 1.0,
+    "aggressiveness": {
+      "axial": 1.0,
+      "radial": 1.0,
+      "feed": 1.0
+    }
+  },
+  {
+    "id": "tormach_1100mx",
+    "axis_max_feed_mm_min": 7500,
+    "rigidity_factor": 0.7,
+    "aggressiveness": {
+      "axial": 0.8,
+      "radial": 0.8,
+      "feed": 0.9
+    }
+  },
+  {
+    "id": "makino_v33i",
+    "axis_max_feed_mm_min": 25000,
+    "rigidity_factor": 1.5,
+    "aggressiveness": {
+      "axial": 1.2,
+      "radial": 1.2,
+      "feed": 1.1
+    }
+  }
+]
