@@ -17,7 +17,7 @@ const testMaterial: Material = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '10.0': [0.03, 0.12]
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+   
   force_coeff_kn_mm2: 0.0012,
   specific_cutting_energy_j_mm3: 0.75,
   chip_thinning: {
