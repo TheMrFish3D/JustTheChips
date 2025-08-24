@@ -24,14 +24,29 @@ export {
   type ChiploadCalculationWarning
 } from './chipload.js'
 
+// Export engagement and MRR calculation functions
+export {
+  calculateEngagementAndMRR,
+  type EngagementCalculationResult,
+  type EngagementCalculationWarning
+} from './engagement.js'
+
+// Export power calculation functions
+export {
+  calculatePower,
+  getToolPowerFactor,
+  getSpindlePowerAtRPM,
+  applyPowerLimiting,
+  type PowerCalculationResult,
+  type PowerCalculationWarning
+} from './power.js'
+
+// TODO: Remove these placeholder exports once all modules are implemented
+// These are just stubs to prevent compilation errors
+
 // speeds-feeds.ts - RPM, feed, chipload calculations
 export function calculateRPM(): number {
   throw new Error('calculateRPM() not yet implemented')
-}
-
-// power.ts - Power and torque analysis  
-export function calculatePower(): number {
-  throw new Error('calculatePower() not yet implemented')
 }
 
 // deflection.ts - Static and dynamic tool deflection
