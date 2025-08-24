@@ -64,15 +64,23 @@ export {
   type DeflectionCalculationWarning
 } from './deflection.js'
 
-// TODO: Remove these placeholder exports once all modules are implemented
-// These are just stubs to prevent compilation errors
+// Export validation functions
+export {
+  validateInputs,
+  evaluateChipload,
+  evaluateDeflection,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type ChiploadEvaluationResult,
+  type DeflectionEvaluationResult
+} from './validation.js'
 
-// speeds-feeds.ts - RPM, feed, chipload calculations
-export function calculateRPM(): number {
-  throw new Error('calculateRPM() not yet implemented')
-}
-
-// validation.ts - Input validation and warnings
-export function validateInputs(): boolean {
-  throw new Error('validateInputs() not yet implemented')
-}
+// Export output assembly functions
+export {
+  assembleOutput,
+  applyOutputRounding,
+  roundForOutput,
+  type CalculationOutput,
+  type OutputAssemblyInput
+} from './output.js'
