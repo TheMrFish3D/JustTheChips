@@ -1,6 +1,7 @@
 import { materials, machines, tools, spindles } from '../../core/data/index.js'
 import type { CutType } from '../../core/data/schemas/inputs.js'
 import { useCalculatorStore } from '../../store/index.js'
+import { useInputValidation } from '../../store/useInputValidation.js'
 import { EntitySelector, NumericInputWithUnits } from '../ui/index.js'
 
 const cutTypes: { value: CutType; label: string }[] = [
@@ -14,6 +15,7 @@ const cutTypes: { value: CutType; label: string }[] = [
 
 export function InputsSection() {
   const store = useCalculatorStore()
+  const { getFieldError, getFieldWarnings } = useInputValidation()
   
   // Transform data for EntitySelector
   const machineOptions = machines.map(machine => ({
@@ -63,6 +65,7 @@ export function InputsSection() {
           options={machineOptions}
           placeholder="Select machine"
           onChange={(value) => store.setInput('machineId', value)}
+          error={getFieldError('machineId')}
           required
         />
         
@@ -74,6 +77,7 @@ export function InputsSection() {
           options={spindleOptions}
           placeholder="Select spindle"
           onChange={(value) => store.setInput('spindleId', value)}
+          error={getFieldError('spindleId')}
           required
         />
         
@@ -85,6 +89,7 @@ export function InputsSection() {
           options={toolOptions}
           placeholder="Select tool"
           onChange={(value) => store.setInput('toolId', value)}
+          error={getFieldError('toolId')}
           required
         />
         
@@ -96,6 +101,7 @@ export function InputsSection() {
           options={materialOptions}
           placeholder="Select material"
           onChange={(value) => store.setInput('materialId', value)}
+          error={getFieldError('materialId')}
           required
         />
         
@@ -129,6 +135,8 @@ export function InputsSection() {
           step={0.1}
           placeholder="1.0"
           onChange={(value) => store.setInput('aggressiveness', value)}
+          error={getFieldError('aggressiveness')}
+          warning={getFieldWarnings('aggressiveness')[0]?.message}
         />
         
       </div>
@@ -153,6 +161,8 @@ export function InputsSection() {
             step={0.1}
             placeholder="Auto"
             onChange={(value) => store.setInput('user_doc_mm', value)}
+            error={getFieldError('user_doc_mm')}
+            warning={getFieldWarnings('user_doc_mm')[0]?.message}
           />
           
           {/* User WOC */}
@@ -165,6 +175,8 @@ export function InputsSection() {
             step={0.1}
             placeholder="Auto"
             onChange={(value) => store.setInput('user_woc_mm', value)}
+            error={getFieldError('user_woc_mm')}
+            warning={getFieldWarnings('user_woc_mm')[0]?.message}
           />
           
           {/* Override Flutes */}
@@ -176,6 +188,8 @@ export function InputsSection() {
             step={1}
             placeholder="Auto"
             onChange={(value) => store.setInput('override_flutes', value)}
+            error={getFieldError('override_flutes')}
+            warning={getFieldWarnings('override_flutes')[0]?.message}
           />
           
           {/* Override Stickout */}
@@ -188,6 +202,8 @@ export function InputsSection() {
             step={0.1}
             placeholder="Auto"
             onChange={(value) => store.setInput('override_stickout_mm', value)}
+            error={getFieldError('override_stickout_mm')}
+            warning={getFieldWarnings('override_stickout_mm')[0]?.message}
           />
           
         </div>
