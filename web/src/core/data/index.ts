@@ -1,28 +1,14 @@
-// Data loaders and validation
-// This will contain material, machine, tool, and spindle data loaders
-// Will be implemented in future iterations
+// Data loaders and validation with zod schemas
+// Exports all domain entities with runtime validation
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Material {
-  // Will be defined with zod schemas later
-}
+// Re-export all schemas and types
+export * from './schemas/index.js'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Machine {
-  // Will be defined with zod schemas later  
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Tool {
-  // Will be defined with zod schemas later
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Spindle {
-  // Will be defined with zod schemas later
-}
+// Import types for the data arrays
+import type { Material, Machine, Tool, Spindle } from './schemas/index.js'
 
 // Placeholder exports for future implementation
+// These will be populated with curated JSON datasets in future iterations
 export const materials: Material[] = []
 export const machines: Machine[] = []
 export const tools: Tool[] = []
