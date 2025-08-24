@@ -41,17 +41,35 @@ export {
   type PowerCalculationWarning
 } from './power.js'
 
+// Export force calculation functions
+export {
+  calculateCuttingForce,
+  getToolForceMultiplier,
+  type ForceCalculationResult,
+  type ForceCalculationWarning
+} from './force.js'
+
+// Export deflection calculation functions
+export {
+  calculateDeflection,
+  calculateStaticDeflection,
+  calculateDynamicAmplification,
+  getYoungsModulus,
+  estimateToolMass,
+  MATERIAL_MODULUS_GPA,
+  DEFAULT_HOLDER_COMPLIANCE_MM_PER_N,
+  type DeflectionCalculationResult,
+  type StaticDeflectionResult,
+  type DynamicAmplificationResult,
+  type DeflectionCalculationWarning
+} from './deflection.js'
+
 // TODO: Remove these placeholder exports once all modules are implemented
 // These are just stubs to prevent compilation errors
 
 // speeds-feeds.ts - RPM, feed, chipload calculations
 export function calculateRPM(): number {
   throw new Error('calculateRPM() not yet implemented')
-}
-
-// deflection.ts - Static and dynamic tool deflection
-export function calculateDeflection(): number {
-  throw new Error('calculateDeflection() not yet implemented')
 }
 
 // validation.ts - Input validation and warnings
