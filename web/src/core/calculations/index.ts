@@ -14,6 +14,16 @@ export {
   type SpeedCalculationWarning
 } from './speeds.js'
 
+// Export chipload and feed calculation functions
+export {
+  calculateChiploadAndFeed,
+  getChiploadRange,
+  getCoatingFactor,
+  getToolChiploadFactor,
+  type ChiploadCalculationResult,
+  type ChiploadCalculationWarning
+} from './chipload.js'
+
 // speeds-feeds.ts - RPM, feed, chipload calculations
 export function calculateRPM(): number {
   throw new Error('calculateRPM() not yet implemented')
