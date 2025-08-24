@@ -1,15 +1,12 @@
 // Core calculation engine orchestrator
 // This will be implemented in future iterations
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface CalculationInputs {
-  // Will be defined with proper schemas later
-}
+import type { CalculationOutput } from './calculations/output.js'
+import type { Inputs } from './data/schemas/inputs.js'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface CalculationResults {
-  // Will be defined with proper outputs later
-}
+// Using the proper output type from calculations module
+export type CalculationInputs = Inputs
+export type CalculationResults = CalculationOutput
 
 export function calculate(): CalculationResults {
   // Placeholder implementation
