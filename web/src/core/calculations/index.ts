@@ -2,6 +2,18 @@
 // Will contain speeds-feeds, power, deflection, and validation logic
 // All modules will be pure, side-effect free functions
 
+// Export geometry functions
+export { getEffectiveDiameter, getEffectiveFlutes } from './geometry.js'
+
+// Export speed calculation functions
+export { 
+  calculateSpeedAndRPM, 
+  getSpeedFactor,
+  type CutType,
+  type SpeedCalculationResult,
+  type SpeedCalculationWarning
+} from './speeds.js'
+
 // speeds-feeds.ts - RPM, feed, chipload calculations
 export function calculateRPM(): number {
   throw new Error('calculateRPM() not yet implemented')
