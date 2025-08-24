@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { assembleOutput } from './output.js'
 import type { OutputAssemblyInput } from './output.js'
 
