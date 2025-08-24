@@ -1,10 +1,26 @@
-name: Playwright Tests
+name: CI
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd web && npm ci
+    - name: Run linting
+      run: cd web && npm run lint
+    - name: Run build
+      run: cd web && npm run build
+
   test:
     # Skip this job when the pull request author is a known bot that creates PRs (e.g. Copilot).
     # Configure comma-separated actor substrings in SKIP_CI_ACTORS if you need to add more.
