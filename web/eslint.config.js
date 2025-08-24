@@ -86,7 +86,7 @@ export default tseslint.config([
           leadingUnderscore: 'allow',
           // Allow special characters for Vite path aliases and other special properties
           filter: {
-            regex: '^(@|@/.*|__.*__)$',
+            regex: '^(@|@/.*|__.*__|[0-9]+)$',
             match: false,
           },
         },
