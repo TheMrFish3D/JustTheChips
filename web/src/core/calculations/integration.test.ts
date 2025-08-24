@@ -7,6 +7,8 @@ import {
   calculateChiploadAndFeed,
   calculateEngagementAndMRR,
   calculatePower,
+  calculateCuttingForce,
+  calculateDeflection,
   applyPowerLimiting,
   getEffectiveDiameter,
   getEffectiveFlutes
@@ -159,6 +161,29 @@ describe('Integration: Complete Calculation Pipeline', () => {
     // Final results should be reasonable
     expect(finalFeedRate).toBeGreaterThan(0)
     expect(finalMRR).toBeGreaterThan(0)
+
+    // Step 7: Calculate cutting force
+    const forceResult = calculateCuttingForce(
+      testMaterial,
+      testTool,
+      engagementResult.aeMm,
+      chiploadResult.fzAdjusted
+    )
+
+    expect(forceResult.totalForceN).toBeGreaterThan(0)
+    expect(forceResult.chipAreaMm2).toBeGreaterThan(0)
+
+    // Step 8: Calculate tool deflection
+    const deflectionResult = calculateDeflection(
+      testTool,
+      forceResult.totalForceN,
+      speedResult.rpmActual,
+      effectiveFlutes
+    )
+
+    expect(deflectionResult.totalDeflectionMm).toBeGreaterThan(0)
+    expect(deflectionResult.staticDeflection.totalStaticDeflectionMm).toBeGreaterThan(0)
+    expect(deflectionResult.dynamicAmplification.amplificationFactor).toBeGreaterThan(0)
   })
 
   it('should handle power-limited operation correctly', () => {
@@ -340,5 +365,85 @@ describe('Integration: Complete Calculation Pipeline', () => {
       w.type === 'doc_limited' || w.type === 'woc_limited'
     )
     expect(engagementWarnings.length).toBeGreaterThan(0)
+  })
+
+  it('should calculate force and deflection for complete machining operation', () => {
+    // Use moderate parameters that should generate reasonable force and deflection
+    const effectiveDiameter = getEffectiveDiameter(testTool)
+    const effectiveFlutes = getEffectiveFlutes(testTool)
+
+    const speedResult = calculateSpeedAndRPM(
+      testMaterial, 
+      testSpindle, 
+      effectiveDiameter, 
+      'slot', 
+      1.0
+    )
+
+    const chiploadResult = calculateChiploadAndFeed(
+      testMaterial,
+      testMachine,
+      testTool,
+      effectiveDiameter,
+      effectiveFlutes,
+      speedResult.rpmActual,
+      3.0, // Moderate WOC
+      1.0
+    )
+
+    const engagementResult = calculateEngagementAndMRR(
+      testMaterial,
+      testTool,
+      effectiveDiameter,
+      chiploadResult.vfActual,
+      1.5, // Moderate DOC
+      3.0  // Moderate WOC
+    )
+
+    // Calculate cutting force
+    const forceResult = calculateCuttingForce(
+      testMaterial,
+      testTool,
+      engagementResult.aeMm,
+      chiploadResult.fzAdjusted
+    )
+
+    // Force should be reasonable for aluminum with moderate cuts
+    expect(forceResult.totalForceN).toBeGreaterThan(50)
+    expect(forceResult.totalForceN).toBeLessThan(2000) // Not excessively high
+    expect(forceResult.toolForceMultiplier).toBe(1.0) // Endmill multiplier
+
+    // Calculate deflection
+    const deflectionResult = calculateDeflection(
+      testTool,
+      forceResult.totalForceN,
+      speedResult.rpmActual,
+      effectiveFlutes
+    )
+
+    // Deflection should be positive but reasonable for a 6mm carbide tool at 20mm stickout
+    expect(deflectionResult.totalDeflectionMm).toBeGreaterThan(0)
+    expect(deflectionResult.totalDeflectionMm).toBeLessThan(2.0) // Should be under 2mm for reasonable cuts
+
+    // Check individual deflection components
+    expect(deflectionResult.staticDeflection.bendingDeflectionMm).toBeGreaterThan(0)
+    expect(deflectionResult.staticDeflection.shearDeflectionMm).toBeGreaterThan(0)
+    expect(deflectionResult.staticDeflection.holderDeflectionMm).toBeGreaterThan(0)
+
+    // Dynamic amplification should be reasonable
+    expect(deflectionResult.dynamicAmplification.naturalFrequencyHz).toBeGreaterThan(0)
+    expect(deflectionResult.dynamicAmplification.operatingFrequencyHz).toBeGreaterThan(0)
+    expect(deflectionResult.dynamicAmplification.amplificationFactor).toBeGreaterThan(0.1)
+    expect(deflectionResult.dynamicAmplification.amplificationFactor).toBeLessThan(50)
+
+    // For moderate cutting conditions, deflection warnings should be expected
+    const deflectionWarnings = deflectionResult.warnings.filter(w => 
+      w.type === 'deflection_danger' || w.type === 'deflection_warning'
+    )
+    // With 0.75mm deflection, we should get a danger warning
+    if (deflectionResult.totalDeflectionMm > 0.05) {
+      expect(deflectionWarnings.length).toBeGreaterThanOrEqual(1)
+      expect(deflectionWarnings[0].severity).toBe('danger')
+    }
   })
 })
