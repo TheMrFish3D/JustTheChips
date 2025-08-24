@@ -26,7 +26,7 @@ export interface CalculationOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   force_N: number                 // Cutting force (float)
   deflection_mm: number           // Total deflection (float)
-  warnings: Array<{type: string, message: string}>  // All warnings
+  warnings: Array<{type: string, message: string, severity?: string}>  // All warnings with optional severity
   toolType: string                // Tool type string
   effectiveDiameter: number       // Effective diameter (float)
   user_doc_override: boolean      // Whether user DOC was used
@@ -66,7 +66,8 @@ export function assembleOutput(input: OutputAssemblyInput): CalculationOutput {
     ...input.deflectionResult.warnings
   ].map(warning => ({
     type: warning.type,
-    message: warning.message
+    message: warning.message,
+    severity: warning.severity
   }))
 
   // Convert surface speed from m/min to ft/min (1 m = 3.28084 ft)
