@@ -6,6 +6,11 @@ on:
     branches: [ main, master ]
 jobs:
   test:
+    # Skip this job when the pull request author is a known bot that creates PRs (e.g. Copilot).
+    # Configure comma-separated actor substrings in SKIP_CI_ACTORS if you need to add more.
+    env:
+      SKIP_CI_ACTORS: "github-copilot,github-actions[bot]"
+    if: ${{ !(github.event_name == 'pull_request' && contains(env.SKIP_CI_ACTORS, github.event.pull_request.user.login)) }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
