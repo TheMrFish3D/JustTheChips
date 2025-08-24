@@ -1,5 +1,7 @@
+import { materials, machines, tools, spindles } from '../../core/data/index.js'
 import type { CutType } from '../../core/data/schemas/inputs.js'
 import { useCalculatorStore } from '../../store/index.js'
+import { EntitySelector, NumericInputWithUnits } from '../ui/index.js'
 
 const cutTypes: { value: CutType; label: string }[] = [
   { value: 'slot', label: 'Slot' },
@@ -12,6 +14,31 @@ const cutTypes: { value: CutType; label: string }[] = [
 
 export function InputsSection() {
   const store = useCalculatorStore()
+  
+  // Transform data for EntitySelector
+  const machineOptions = machines.map(machine => ({
+    id: machine.id,
+    label: machine.id,
+    description: `Max feed: ${machine.axis_max_feed_mm_min} mm/min, Rigidity: ${machine.rigidity_factor}`
+  }))
+  
+  const spindleOptions = spindles.map(spindle => ({
+    id: spindle.id,
+    label: spindle.id,
+    description: `${spindle.rated_power_kw}kW, ${spindle.rpm_min}-${spindle.rpm_max} RPM`
+  }))
+  
+  const toolOptions = tools.map(tool => ({
+    id: tool.id,
+    label: tool.id,
+    description: `${tool.diameter_mm}mm ${tool.type}, ${tool.flutes} flutes, ${tool.coating}`
+  }))
+  
+  const materialOptions = materials.map(material => ({
+    id: material.id,
+    label: `${material.id} (${material.category})`,
+    description: `Vc: ${material.vc_range_m_min[0]}-${material.vc_range_m_min[1]} m/min`
+  }))
   
   return (
     <div style={{ 
@@ -29,64 +56,48 @@ export function InputsSection() {
       }}>
         
         {/* Machine Selection */}
-        <div>
-          <label htmlFor="machineId" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Machine:
-          </label>
-          <input
-            id="machineId"
-            type="text"
-            placeholder="Select or enter machine ID"
-            value={store.machineId || ''}
-            onChange={(e) => store.setInput('machineId', e.target.value)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
+        <EntitySelector
+          id="machineId"
+          label="Machine"
+          value={store.machineId}
+          options={machineOptions}
+          placeholder="Select machine"
+          onChange={(value) => store.setInput('machineId', value)}
+          required
+        />
         
         {/* Spindle Selection */}
-        <div>
-          <label htmlFor="spindleId" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Spindle:
-          </label>
-          <input
-            id="spindleId"
-            type="text"
-            placeholder="Select or enter spindle ID"
-            value={store.spindleId || ''}
-            onChange={(e) => store.setInput('spindleId', e.target.value)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
+        <EntitySelector
+          id="spindleId"
+          label="Spindle"
+          value={store.spindleId}
+          options={spindleOptions}
+          placeholder="Select spindle"
+          onChange={(value) => store.setInput('spindleId', value)}
+          required
+        />
         
         {/* Tool Selection */}
-        <div>
-          <label htmlFor="toolId" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Tool:
-          </label>
-          <input
-            id="toolId"
-            type="text"
-            placeholder="Select or enter tool ID"
-            value={store.toolId || ''}
-            onChange={(e) => store.setInput('toolId', e.target.value)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
+        <EntitySelector
+          id="toolId"
+          label="Tool"
+          value={store.toolId}
+          options={toolOptions}
+          placeholder="Select tool"
+          onChange={(value) => store.setInput('toolId', value)}
+          required
+        />
         
         {/* Material Selection */}
-        <div>
-          <label htmlFor="materialId" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Material:
-          </label>
-          <input
-            id="materialId"
-            type="text"
-            placeholder="Select or enter material ID"
-            value={store.materialId || ''}
-            onChange={(e) => store.setInput('materialId', e.target.value)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-        </div>
+        <EntitySelector
+          id="materialId"
+          label="Material"
+          value={store.materialId}
+          options={materialOptions}
+          placeholder="Select material"
+          onChange={(value) => store.setInput('materialId', value)}
+          required
+        />
         
         {/* Cut Type Selection */}
         <div>
@@ -109,23 +120,16 @@ export function InputsSection() {
         </div>
         
         {/* Aggressiveness */}
-        <div>
-          <label htmlFor="aggressiveness" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-            Aggressiveness:
-          </label>
-          <input
-            id="aggressiveness"
-            type="number"
-            min="0.1"
-            max="3.0"
-            step="0.1"
-            placeholder="1.0"
-            value={store.aggressiveness || ''}
-            onChange={(e) => store.setInput('aggressiveness', parseFloat(e.target.value) || undefined)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-          />
-          <small style={{ color: '#666' }}>Range: 0.1 to 3.0 (1.0 = normal)</small>
-        </div>
+        <NumericInputWithUnits
+          id="aggressiveness"
+          label="Aggressiveness"
+          value={store.aggressiveness}
+          min={0.1}
+          max={3.0}
+          step={0.1}
+          placeholder="1.0"
+          onChange={(value) => store.setInput('aggressiveness', value)}
+        />
         
       </div>
       
@@ -140,72 +144,51 @@ export function InputsSection() {
         }}>
           
           {/* User DOC */}
-          <div>
-            <label htmlFor="user_doc_mm" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-              DOC (mm):
-            </label>
-            <input
-              id="user_doc_mm"
-              type="number"
-              min="0"
-              step="0.1"
-              placeholder="Auto"
-              value={store.user_doc_mm || ''}
-              onChange={(e) => store.setInput('user_doc_mm', parseFloat(e.target.value) || undefined)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-            />
-          </div>
+          <NumericInputWithUnits
+            id="user_doc_mm"
+            label="DOC"
+            unit="mm"
+            value={store.user_doc_mm}
+            min={0}
+            step={0.1}
+            placeholder="Auto"
+            onChange={(value) => store.setInput('user_doc_mm', value)}
+          />
           
           {/* User WOC */}
-          <div>
-            <label htmlFor="user_woc_mm" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-              WOC (mm):
-            </label>
-            <input
-              id="user_woc_mm"
-              type="number"
-              min="0"
-              step="0.1"
-              placeholder="Auto"
-              value={store.user_woc_mm || ''}
-              onChange={(e) => store.setInput('user_woc_mm', parseFloat(e.target.value) || undefined)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-            />
-          </div>
+          <NumericInputWithUnits
+            id="user_woc_mm"
+            label="WOC"
+            unit="mm"
+            value={store.user_woc_mm}
+            min={0}
+            step={0.1}
+            placeholder="Auto"
+            onChange={(value) => store.setInput('user_woc_mm', value)}
+          />
           
           {/* Override Flutes */}
-          <div>
-            <label htmlFor="override_flutes" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-              Flutes Override:
-            </label>
-            <input
-              id="override_flutes"
-              type="number"
-              min="1"
-              step="1"
-              placeholder="Auto"
-              value={store.override_flutes || ''}
-              onChange={(e) => store.setInput('override_flutes', parseInt(e.target.value) || undefined)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-            />
-          </div>
+          <NumericInputWithUnits
+            id="override_flutes"
+            label="Flutes Override"
+            value={store.override_flutes}
+            min={1}
+            step={1}
+            placeholder="Auto"
+            onChange={(value) => store.setInput('override_flutes', value)}
+          />
           
           {/* Override Stickout */}
-          <div>
-            <label htmlFor="override_stickout_mm" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-              Stickout (mm):
-            </label>
-            <input
-              id="override_stickout_mm"
-              type="number"
-              min="0"
-              step="0.1"
-              placeholder="Auto"
-              value={store.override_stickout_mm || ''}
-              onChange={(e) => store.setInput('override_stickout_mm', parseFloat(e.target.value) || undefined)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-            />
-          </div>
+          <NumericInputWithUnits
+            id="override_stickout_mm"
+            label="Stickout"
+            unit="mm"
+            value={store.override_stickout_mm}
+            min={0}
+            step={0.1}
+            placeholder="Auto"
+            onChange={(value) => store.setInput('override_stickout_mm', value)}
+          />
           
         </div>
       </details>
