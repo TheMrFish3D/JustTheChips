@@ -15,11 +15,13 @@ Order prioritizes project foundations (standards, testing) before features.
     - Add ESLint (typescript + react), Prettier, EditorConfig
     - Enforce import/order, no-floating-promises, eqeqeq, naming conventions
     - Add pre-commit lint-staged hook
-- Task: Testing guidelines and harness
+- Task: Testing guidelines and harness ✅ COMPLETED
   - Steps:
-    - Add Vitest + React Testing Library
-    - Define test pyramid and coverage threshold
-    - Create sample unit tests for utils
+    - ✅ Add Vitest + React Testing Library (already configured)
+    - ✅ Define test pyramid and coverage threshold (80% minimum)
+    - ✅ Create sample unit tests for utils (math.test.ts with 100% coverage)
+    - ✅ Add testing guidelines documentation (docs/testing-guidelines.md)
+    - ✅ Add coverage script and @vitest/coverage-v8 dependency
 
 ## 1. Core Data Schemas and Validation
 - Task: Define TypeScript types and zod schemas for Material/Machine/Tool/Spindle/Inputs

@@ -8,7 +8,25 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     coverage: {
-      reporter: ['text', 'html'],
+      reporter: ['text', 'html', 'json'],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+      exclude: [
+        'node_modules/',
+        'dist/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/main.tsx',
+        '**/vite-env.d.ts',
+        '**/*.test.*',
+        '**/*.spec.*',
+      ],
     },
   },
 })
