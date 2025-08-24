@@ -1,0 +1,17 @@
+{
+  "name": "justthechips",
+  "version": "1.0.0",
+  "description": "1. Purpose Provide accurate spindle speeds, feed rates, power requirements, and tool deflection estimates for CNC machining operations across various materials, tools, machines, and cutting conditions.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0"
+  }
+}

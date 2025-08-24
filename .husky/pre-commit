@@ -1,0 +1,4 @@
+#!/bin/sh
+# Temporary pre-commit stub to allow commits in the dev container.
+# Replace with real husky + lint-staged invocation when ready.
+exit 0
