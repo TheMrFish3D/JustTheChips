@@ -24,14 +24,15 @@ Order prioritizes project foundations (standards, testing) before features.
     - ✅ Add coverage script and @vitest/coverage-v8 dependency
 
 ## 1. Core Data Schemas and Validation
-- Task: Define TypeScript types and zod schemas for Material/Machine/Tool/Spindle/Inputs
+- Task: Define TypeScript types and zod schemas for Material/Machine/Tool/Spindle/Inputs ✅ COMPLETED
   - Steps:
-    - Create schema files, infer TS types, export validators
-    - Write unit tests for schema validation (accept good, reject bad)
-- Task: Seed example JSON datasets and loaders
+    - ✅ Create schema files, infer TS types, export validators (completed in previous work)
+    - ✅ Write unit tests for schema validation (accept good, reject bad) (97 tests passing)
+- Task: Seed example JSON datasets and loaders ✅ COMPLETED
   - Steps:
-    - Add minimal curated entries for each domain
-    - Implement loader utilities with zod-safe parse and helpful errors
+    - ✅ Add minimal curated entries for each domain (3 materials, 3 machines, 5 tools, 3 spindles)
+    - ✅ Implement loader utilities with zod-safe parse and helpful errors (comprehensive error handling)
+    - ✅ Tests for loaders (27 new tests covering all loader functionality and integration)
 
 ## 2. Core Calculation Engine
 - Task: Implement helpers (math, clamp, interpolate, units)
