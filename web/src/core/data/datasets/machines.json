@@ -10,13 +10,43 @@
     }
   },
   {
-    "id": "lowrider_v3",
+    "id": "lowrider_v3_small",
+    "axis_max_feed_mm_min": 3000,
+    "rigidity_factor": 0.35,
+    "aggressiveness": {
+      "axial": 0.5,
+      "radial": 0.6,
+      "feed": 0.7
+    }
+  },
+  {
+    "id": "lowrider_v3_medium",
     "axis_max_feed_mm_min": 3000,
     "rigidity_factor": 0.25,
     "aggressiveness": {
       "axial": 0.4,
       "radial": 0.5,
       "feed": 0.6
+    }
+  },
+  {
+    "id": "lowrider_v3_large",
+    "axis_max_feed_mm_min": 3000,
+    "rigidity_factor": 0.20,
+    "aggressiveness": {
+      "axial": 0.3,
+      "radial": 0.4,
+      "feed": 0.5
+    }
+  },
+  {
+    "id": "lowrider_v3_xlarge",
+    "axis_max_feed_mm_min": 3000,
+    "rigidity_factor": 0.15,
+    "aggressiveness": {
+      "axial": 0.25,
+      "radial": 0.3,
+      "feed": 0.4
     }
   },
   {

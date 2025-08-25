@@ -14,15 +14,17 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Find existing rigidity measurements or studies
 - Develop rigidity factor calculations for different 3018 variants
 
-### 2. Lowrider v3 CNC Rigidity Analysis  
+### 2. ~~Lowrider v3 CNC Rigidity Analysis~~ **COMPLETED**
 **Priority:** High
-**Estimated Effort:** 2-3 hours
+**Estimated Effort:** 2-3 hours  
+**Status:** Completed - See `docs/research/lowrider-v3-rigidity-analysis.md`
 **Description:** Research and model the structural rigidity of Lowrider v3 CNC machines
-- Analyze torsion box table construction impact on rigidity
-- Study rolling/sliding bearing system effects
-- Research spindle mount options and their rigidity
-- Find community measurements and testing data
-- Develop rigidity factors for different table sizes
+- ✅ Analyzed torsion box table construction impact on rigidity
+- ✅ Studied rolling/sliding bearing system effects
+- ✅ Researched spindle mount options and their rigidity
+- ✅ Found community measurements and testing data
+- ✅ Developed rigidity factors for different table sizes
+- ✅ Updated machine data with size-specific variants
 
 ### 3. Queenbee Pro CNC Rigidity Analysis
 **Priority:** Medium
