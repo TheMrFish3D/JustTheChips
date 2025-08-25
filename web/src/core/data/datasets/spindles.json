@@ -1,47 +1,90 @@
 [
   {
-    "id": "spindle_2_2kw",
+    "id": "dewalt_router_1_25hp",
+    "rated_power_kw": 0.93,
+    "rpm_min": 16000,
+    "rpm_max": 27000,
+    "base_rpm": 22000,
+    "power_curve": [
+      { "rpm": 16000, "power_kw": 0.8 },
+      { "rpm": 20000, "power_kw": 0.9 },
+      { "rpm": 22000, "power_kw": 0.93 },
+      { "rpm": 25000, "power_kw": 0.85 },
+      { "rpm": 27000, "power_kw": 0.75 }
+    ]
+  },
+  {
+    "id": "makita_router_1_25hp",
+    "rated_power_kw": 0.93,
+    "rpm_min": 10000,
+    "rpm_max": 30000,
+    "base_rpm": 20000,
+    "power_curve": [
+      { "rpm": 10000, "power_kw": 0.6 },
+      { "rpm": 15000, "power_kw": 0.8 },
+      { "rpm": 20000, "power_kw": 0.93 },
+      { "rpm": 25000, "power_kw": 0.85 },
+      { "rpm": 30000, "power_kw": 0.7 }
+    ]
+  },
+  {
+    "id": "vfd_spindle_0_8kw",
+    "rated_power_kw": 0.8,
+    "rpm_min": 100,
+    "rpm_max": 24000,
+    "base_rpm": 1500,
+    "power_curve": [
+      { "rpm": 100, "power_kw": 0.1 },
+      { "rpm": 1500, "power_kw": 0.8 },
+      { "rpm": 6000, "power_kw": 0.8 },
+      { "rpm": 12000, "power_kw": 0.65 },
+      { "rpm": 18000, "power_kw": 0.5 },
+      { "rpm": 24000, "power_kw": 0.4 }
+    ]
+  },
+  {
+    "id": "vfd_spindle_1_5kw",
+    "rated_power_kw": 1.5,
+    "rpm_min": 100,
+    "rpm_max": 24000,
+    "base_rpm": 1500,
+    "power_curve": [
+      { "rpm": 100, "power_kw": 0.2 },
+      { "rpm": 1500, "power_kw": 1.5 },
+      { "rpm": 6000, "power_kw": 1.5 },
+      { "rpm": 12000, "power_kw": 1.2 },
+      { "rpm": 18000, "power_kw": 0.9 },
+      { "rpm": 24000, "power_kw": 0.7 }
+    ]
+  },
+  {
+    "id": "vfd_spindle_2_2kw",
     "rated_power_kw": 2.2,
     "rpm_min": 100,
     "rpm_max": 24000,
-    "base_rpm": 1000,
+    "base_rpm": 1500,
     "power_curve": [
-      { "rpm": 100, "power_kw": 0.2 },
-      { "rpm": 1000, "power_kw": 2.2 },
+      { "rpm": 100, "power_kw": 0.3 },
+      { "rpm": 1500, "power_kw": 2.2 },
       { "rpm": 6000, "power_kw": 2.2 },
       { "rpm": 12000, "power_kw": 1.8 },
-      { "rpm": 18000, "power_kw": 1.2 },
-      { "rpm": 24000, "power_kw": 0.8 }
+      { "rpm": 18000, "power_kw": 1.3 },
+      { "rpm": 24000, "power_kw": 1.0 }
     ]
   },
   {
-    "id": "spindle_7_5kw",
-    "rated_power_kw": 7.5,
-    "rpm_min": 50,
-    "rpm_max": 15000,
-    "base_rpm": 2000,
+    "id": "vfd_spindle_3_2kw",
+    "rated_power_kw": 3.2,
+    "rpm_min": 100,
+    "rpm_max": 18000,
+    "base_rpm": 1500,
     "power_curve": [
-      { "rpm": 50, "power_kw": 0.5 },
-      { "rpm": 500, "power_kw": 1.8 },
-      { "rpm": 2000, "power_kw": 7.5 },
-      { "rpm": 6000, "power_kw": 7.5 },
-      { "rpm": 10000, "power_kw": 5.5 },
-      { "rpm": 15000, "power_kw": 3.8 }
-    ]
-  },
-  {
-    "id": "spindle_0_8kw_high_speed",
-    "rated_power_kw": 0.8,
-    "rpm_min": 500,
-    "rpm_max": 60000,
-    "base_rpm": 10000,
-    "power_curve": [
-      { "rpm": 500, "power_kw": 0.05 },
-      { "rpm": 5000, "power_kw": 0.4 },
-      { "rpm": 10000, "power_kw": 0.8 },
-      { "rpm": 30000, "power_kw": 0.8 },
-      { "rpm": 45000, "power_kw": 0.6 },
-      { "rpm": 60000, "power_kw": 0.4 }
+      { "rpm": 100, "power_kw": 0.4 },
+      { "rpm": 1500, "power_kw": 3.2 },
+      { "rpm": 6000, "power_kw": 3.2 },
+      { "rpm": 10000, "power_kw": 2.8 },
+      { "rpm": 15000, "power_kw": 2.2 },
+      { "rpm": 18000, "power_kw": 1.8 }
     ]
   }
 ]

@@ -1,32 +1,82 @@
 [
   {
-    "id": "haas_vf2",
-    "axis_max_feed_mm_min": 15000,
-    "rigidity_factor": 1.0,
+    "id": "3018_cnc",
+    "axis_max_feed_mm_min": 1000,
+    "rigidity_factor": 0.15,
     "aggressiveness": {
-      "axial": 1.0,
-      "radial": 1.0,
-      "feed": 1.0
+      "axial": 0.3,
+      "radial": 0.4,
+      "feed": 0.5
     }
   },
   {
-    "id": "tormach_1100mx",
-    "axis_max_feed_mm_min": 7500,
-    "rigidity_factor": 0.7,
+    "id": "lowrider_v3",
+    "axis_max_feed_mm_min": 3000,
+    "rigidity_factor": 0.25,
+    "aggressiveness": {
+      "axial": 0.4,
+      "radial": 0.5,
+      "feed": 0.6
+    }
+  },
+  {
+    "id": "queenbee_pro",
+    "axis_max_feed_mm_min": 4000,
+    "rigidity_factor": 0.35,
+    "aggressiveness": {
+      "axial": 0.5,
+      "radial": 0.6,
+      "feed": 0.7
+    }
+  },
+  {
+    "id": "printnc",
+    "axis_max_feed_mm_min": 6000,
+    "rigidity_factor": 0.6,
+    "aggressiveness": {
+      "axial": 0.7,
+      "radial": 0.8,
+      "feed": 0.8
+    }
+  },
+  {
+    "id": "benchtop_mill",
+    "axis_max_feed_mm_min": 2500,
+    "rigidity_factor": 0.45,
+    "aggressiveness": {
+      "axial": 0.6,
+      "radial": 0.7,
+      "feed": 0.7
+    }
+  },
+  {
+    "id": "rigid_hobby_mill",
+    "axis_max_feed_mm_min": 5000,
+    "rigidity_factor": 0.55,
+    "aggressiveness": {
+      "axial": 0.7,
+      "radial": 0.7,
+      "feed": 0.8
+    }
+  },
+  {
+    "id": "entry_vmc",
+    "axis_max_feed_mm_min": 8000,
+    "rigidity_factor": 0.8,
     "aggressiveness": {
       "axial": 0.8,
-      "radial": 0.8,
+      "radial": 0.9,
       "feed": 0.9
     }
   },
   {
-    "id": "makino_v33i",
-    "axis_max_feed_mm_min": 25000,
-    "rigidity_factor": 1.5,
+    "id": "custom",
+    "axis_max_feed_mm_min": 3000,
+    "rigidity_factor": 0.5,
     "aggressiveness": {
-      "axial": 1.2,
-      "radial": 1.2,
-      "feed": 1.1
+      "axial": 0.6,
+      "radial": 0.6,
+      "feed": 0.7
     }
   }
 ]
