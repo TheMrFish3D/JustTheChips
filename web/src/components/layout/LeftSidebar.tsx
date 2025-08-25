@@ -15,7 +15,10 @@ export function LeftSidebar() {
   // Create user-friendly labels for machines
   const getMachineLabel = (id: string): string => {
     const labels = new Map([
-      ['3018_cnc', '3018 CNC'],
+      ['3018_basic', '3018 Basic'],
+      ['3018_pro', '3018 Pro'],
+      ['3018_pro_max', '3018 Pro Max'],
+      ['3018_steel', '3018 Steel Frame'],
       ['lowrider_v3', 'Lowrider v3'],
       ['queenbee_pro', 'Queenbee Pro'],
       ['printnc', 'PrintNC'],

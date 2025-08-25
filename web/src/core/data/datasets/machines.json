@@ -1,12 +1,42 @@
 [
   {
-    "id": "3018_cnc",
+    "id": "3018_basic",
+    "axis_max_feed_mm_min": 800,
+    "rigidity_factor": 0.12,
+    "aggressiveness": {
+      "axial": 0.25,
+      "radial": 0.35,
+      "feed": 0.4
+    }
+  },
+  {
+    "id": "3018_pro",
     "axis_max_feed_mm_min": 1000,
-    "rigidity_factor": 0.15,
+    "rigidity_factor": 0.18,
     "aggressiveness": {
       "axial": 0.3,
       "radial": 0.4,
       "feed": 0.5
+    }
+  },
+  {
+    "id": "3018_pro_max",
+    "axis_max_feed_mm_min": 1200,
+    "rigidity_factor": 0.25,
+    "aggressiveness": {
+      "axial": 0.35,
+      "radial": 0.45,
+      "feed": 0.55
+    }
+  },
+  {
+    "id": "3018_steel",
+    "axis_max_feed_mm_min": 1500,
+    "rigidity_factor": 0.35,
+    "aggressiveness": {
+      "axial": 0.45,
+      "radial": 0.55,
+      "feed": 0.65
     }
   },
   {
