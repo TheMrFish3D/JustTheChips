@@ -52,15 +52,6 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Research spindle integration rigidity
 - Compare with hobby CNC machines
 
-### 6. Custom Machine Rigidity Estimation Framework
-**Priority:** High
-**Estimated Effort:** 4-5 hours
-**Description:** Develop framework for estimating custom machine rigidity
-- Create mathematical model based on construction type
-- Develop input parameters for rigidity estimation
-- Research correlation between machine weight, frame type, and rigidity
-- Create validation method against known machines
-
 ## Educational Content Research Tasks
 
 ### 7. CNC Parameter Education Research
@@ -101,7 +92,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 24-32 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)

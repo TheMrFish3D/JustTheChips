@@ -89,3 +89,14 @@ export {
   type CalculationOutput,
   type OutputAssemblyInput
 } from './output.js'
+
+// Export rigidity estimation functions
+export {
+  estimateMachineRigidity,
+  validateEstimationFramework,
+  type MachineRigidityInputs,
+  type RigidityEstimationResult,
+  type FrameConstructionType,
+  type MotionSystemType,
+  type SpindleMountType
+} from './rigidity-estimation.js'
