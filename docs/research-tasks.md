@@ -72,15 +72,6 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Document chip load relationships with material removal and tool wear
 - Create troubleshooting guides for common issues
 
-### 8. Hobby Machine Limitations Research
-**Priority:** Medium  
-**Estimated Effort:** 2-3 hours
-**Description:** Research specific limitations and considerations for hobby machines
-- Study power limitations and their effects
-- Research rigidity limitations on achievable surface finish
-- Analyze tooling limitations for hobby machines
-- Document best practices for hobby machine operation
-
 ## Cutting Parameter Research Tasks
 
 ### 9. Hobby Machine Optimal Parameters Research
@@ -101,7 +92,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 26-34 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)
