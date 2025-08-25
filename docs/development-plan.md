@@ -4,17 +4,17 @@ Note: Update this plan with every change. If something is under-implemented or n
 
 Order prioritizes project foundations (standards, testing) before features.
 
-## 0. Project Scaffolding and Standards
-- Task: Initialize React + TypeScript app with Vite
-  - Steps:
-    - Create Vite React-TS scaffold and repo wiring
-    - Configure path aliases and src structure per architecture
-    - Add basic page route placeholders
-- Task: Coding standards and linting
-  - Steps:
-    - Add ESLint (typescript + react), Prettier, EditorConfig
-    - Enforce import/order, no-floating-promises, eqeqeq, naming conventions
-    - Add pre-commit lint-staged hook
+## 0. Project Scaffolding and Standards ✅ COMPLETED
+- ✅ Task: Initialize React + TypeScript app with Vite
+  - ✅ Steps:
+    - ✅ Create Vite React-TS scaffold and repo wiring
+    - ✅ Configure path aliases and src structure per architecture
+    - ✅ Add basic page route placeholders
+- ✅ Task: Coding standards and linting
+  - ✅ Steps:
+    - ✅ Add ESLint (typescript + react), Prettier, EditorConfig
+    - ✅ Enforce import/order, no-floating-promises, eqeqeq, naming conventions
+    - ✅ Add pre-commit lint-staged hook
 - Task: Testing guidelines and harness ✅ COMPLETED
   - Steps:
     - ✅ Add Vitest + React Testing Library (already configured)
@@ -34,54 +34,54 @@ Order prioritizes project foundations (standards, testing) before features.
     - ✅ Implement loader utilities with zod-safe parse and helpful errors (comprehensive error handling)
     - ✅ Tests for loaders (27 new tests covering all loader functionality and integration)
 
-## 2. Core Calculation Engine
-- Task: Implement helpers (math, clamp, interpolate, units)
-  - Steps:
-    - Implement interpolation and clamping with tests
-    - Add unit conversion helpers
-- Task: Effective geometry and RPM
-  - Steps:
-    - Implement getEffectiveDiameter/Flutes and vc→rpm with clamping
-    - Unit tests for each tool type
-- Task: Chipload and feed limiting
-  - Steps:
-    - Implement fz base calc, chip thinning, vf computation
-    - Apply machine axis limit; recompute fz; warnings
-- Task: Engagement, MRR, and power with power-limit scaling
-  - Steps:
-    - Implement ae/ap limits, MRR, specific energy, tool/machine factors
-    - Implement spindle losses, power available curve, scaling, warnings
-- Task: Force and deflection (static + dynamic)
-  - Steps:
-    - Implement force; bending, shear, holder deflection; dynamic amplification
-    - Threshold-based warnings
-- Task: Validation and output assembly
-  - Steps:
-    - Implement validateInputs, chipload/deflection evaluators
-    - Assemble final output per contract; rounding rules
+## 2. Core Calculation Engine ✅ COMPLETED
+- ✅ Task: Implement helpers (math, clamp, interpolate, units)
+  - ✅ Steps:
+    - ✅ Implement interpolation and clamping with tests
+    - ✅ Add unit conversion helpers
+- ✅ Task: Effective geometry and RPM
+  - ✅ Steps:
+    - ✅ Implement getEffectiveDiameter/Flutes and vc→rpm with clamping
+    - ✅ Unit tests for each tool type
+- ✅ Task: Chipload and feed limiting
+  - ✅ Steps:
+    - ✅ Implement fz base calc, chip thinning, vf computation
+    - ✅ Apply machine axis limit; recompute fz; warnings
+- ✅ Task: Engagement, MRR, and power with power-limit scaling
+  - ✅ Steps:
+    - ✅ Implement ae/ap limits, MRR, specific energy, tool/machine factors
+    - ✅ Implement spindle losses, power available curve, scaling, warnings
+- ✅ Task: Force and deflection (static + dynamic)
+  - ✅ Steps:
+    - ✅ Implement force; bending, shear, holder deflection; dynamic amplification
+    - ✅ Threshold-based warnings
+- ✅ Task: Validation and output assembly
+  - ✅ Steps:
+    - ✅ Implement validateInputs, chipload/deflection evaluators
+    - ✅ Assemble final output per contract; rounding rules
 
-## 3. UI Foundation
-- Task: State management and calculator page shell
-  - Steps:
-    - Setup Zustand/Redux store for inputs and results
-    - Wire calculate() on input change; debounce where needed
-- Task: Selectors and inputs components
-  - Steps:
-    - Machine/Spindle/Tool/Material selectors
-    - Numeric input with units and validation messages
-- Task: Results and warnings display
-  - Steps:
-    - Cards for RPM, feed, chipload, power, force, deflection
-    - Warning list with categories and recommendations
+## 3. UI Foundation ✅ COMPLETED
+- ✅ Task: State management and calculator page shell
+  - ✅ Steps:
+    - ✅ Setup Zustand/Redux store for inputs and results
+    - ✅ Wire calculate() on input change; debounce where needed
+- ✅ Task: Selectors and inputs components
+  - ✅ Steps:
+    - ✅ Machine/Spindle/Tool/Material selectors
+    - ✅ Numeric input with units and validation messages
+- ✅ Task: Results and warnings display
+  - ✅ Steps:
+    - ✅ Cards for RPM, feed, chipload, power, force, deflection
+    - ✅ Warning list with categories and recommendations
 
-## 4. Advanced Features and Polishing
-- Task: Charts and what-if analysis
-  - Steps:
-    - RPM vs power, deflection vs stickout graphs
-    - Compute series with memoization
-- Task: Import/Export settings
-  - Steps:
-    - JSON bundle export/import with schema validation
+## 4. Advanced Features and Polishing ✅ COMPLETED
+- ✅ Task: Charts and what-if analysis
+  - ✅ Steps:
+    - ✅ RPM vs power, deflection vs stickout graphs
+    - ✅ Compute series with memoization
+- ✅ Task: Import/Export settings
+  - ✅ Steps:
+    - ✅ JSON bundle export/import with schema validation
 - ✅ Task: Dynamic deflection optimization
   - ✅ Steps:
     - ✅ Suggest diameter/stickout combos for target deflection
@@ -99,7 +99,7 @@ Order prioritizes project foundations (standards, testing) before features.
     - ✅ README project setup and usage (comprehensive user-focused README.md)
     - ✅ Docs on testing guidelines, coding standards, and contribution (CONTRIBUTING.md created)
     - ✅ Linked all existing documentation properly
-- Task: Release v0.1
-  - Steps:
-    - Tag and generate changelog
-    - Publish GitHub Pages build (optional)
+- ✅ Task: Release v0.1
+  - ✅ Steps:
+    - ✅ Tag and generate changelog
+    - ✅ Publish GitHub Pages build (optional)
