@@ -24,14 +24,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Find community measurements and testing data
 - Develop rigidity factors for different table sizes
 
-### 3. Queenbee Pro CNC Rigidity Analysis
-**Priority:** Medium
-**Estimated Effort:** 2 hours  
-**Description:** Research and model the structural rigidity of Queenbee Pro machines
-- Study aluminum frame construction details
-- Analyze linear rail system rigidity
-- Research spindle mounting rigidity
-- Compare with other hobby machines in similar class
+
 
 ### 4. PrintNC CNC Rigidity Analysis
 **Priority:** High
@@ -101,7 +94,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 27-35 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)
