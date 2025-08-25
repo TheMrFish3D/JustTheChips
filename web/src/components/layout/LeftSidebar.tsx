@@ -12,16 +12,44 @@ export function LeftSidebar() {
   const { getFieldError } = useInputValidation()
   const [showMachineConfig, setShowMachineConfig] = useState(false)
   
+  // Create user-friendly labels for machines
+  const getMachineLabel = (id: string): string => {
+    const labels = new Map([
+      ['3018_cnc', '3018 CNC'],
+      ['lowrider_v3', 'Lowrider v3'],
+      ['queenbee_pro', 'Queenbee Pro'],
+      ['printnc', 'PrintNC'],
+      ['benchtop_mill', 'Benchtop Mill'],
+      ['rigid_hobby_mill', 'Rigid Hobby Mill'],
+      ['entry_vmc', 'Entry VMC'],
+      ['custom', 'Custom']
+    ])
+    return labels.get(id) || id
+  }
+
+  // Create user-friendly labels for spindles  
+  const getSpindleLabel = (id: string): string => {
+    const labels: Record<string, string> = {
+      dewalt_router_1_25hp: 'Dewalt Router (1.25HP)',
+      makita_router_1_25hp: 'Makita Router (1.25HP)', 
+      vfd_spindle_0_8kw: 'VFD Spindle 0.8kW',
+      vfd_spindle_1_5kw: 'VFD Spindle 1.5kW',
+      vfd_spindle_2_2kw: 'VFD Spindle 2.2kW',
+      vfd_spindle_3_2kw: 'VFD Spindle 3.2kW'
+    }
+    return labels[id] || id
+  }
+  
   // Transform data for EntitySelector
   const machineOptions = machines.map(machine => ({
     id: machine.id,
-    label: machine.id,
+    label: getMachineLabel(machine.id),
     description: `Max feed: ${machine.axis_max_feed_mm_min} mm/min, Rigidity: ${machine.rigidity_factor}`
   }))
   
   const spindleOptions = spindles.map(spindle => ({
     id: spindle.id,
-    label: spindle.id,
+    label: getSpindleLabel(spindle.id),
     description: `${spindle.rated_power_kw}kW, ${spindle.rpm_min}-${spindle.rpm_max} RPM`
   }))
   
