@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { CutType } from '../../core/data/schemas/inputs.js'
 import { useCalculatorStore } from '../../store/index.js'
 import { useInputValidation } from '../../store/useInputValidation.js'
+import { EducationSection } from '../calculator/EducationSection.js'
 import { NumericInputWithUnits, EducationalTooltip } from '../ui/index.js'
 
 const cutTypes: { value: CutType; label: string }[] = [
@@ -14,7 +15,7 @@ const cutTypes: { value: CutType; label: string }[] = [
   { value: 'boring', label: 'Boring' }
 ]
 
-type TabType = 'basic' | 'advanced' | 'locked'
+type TabType = 'basic' | 'advanced' | 'locked' | 'education'
 
 export function MainParametersArea() {
   const [activeTab, setActiveTab] = useState<TabType>('basic')
@@ -64,6 +65,12 @@ export function MainParametersArea() {
           style={tabStyle(activeTab === 'locked')}
         >
           Locked Values
+        </button>
+        <button
+          onClick={() => setActiveTab('education')}
+          style={tabStyle(activeTab === 'education')}
+        >
+          📚 Education
         </button>
       </div>
       
@@ -279,6 +286,11 @@ export function MainParametersArea() {
               </p>
             </div>
           </div>
+        )}
+
+        {/* Education Tab */}
+        {activeTab === 'education' && (
+          <EducationSection />
         )}
         
       </div>
