@@ -53,6 +53,7 @@ const testSpindle: Spindle = {
   rpm_min: 1000,
   rpm_max: 24000,
   base_rpm: 18000,
+  type: 'vfd_spindle',
   power_curve: [
     { rpm: 1000, power_kw: 0.8 },
     { rpm: 6000, power_kw: 2.2 },

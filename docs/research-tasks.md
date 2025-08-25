@@ -92,16 +92,29 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Analyze tool deflection limits for hobby applications
 - Document parameter ranges for different machine classes
 
-### 10. Power Curve Validation Research
+### 10. Power Curve Validation Research - COMPLETED
 **Priority:** Low
 **Estimated Effort:** 2-3 hours
+**Status:** ✅ COMPLETED
 **Description:** Validate and improve spindle power curve calculations
-- Research actual Dewalt router power curves
-- Validate VFD spindle power characteristics
-- Improve power calculation accuracy
-- Add temperature derating factors
+- ✅ Research actual Dewalt router power curves
+- ✅ Validate VFD spindle power characteristics
+- ✅ Improve power calculation accuracy
+- ✅ Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+**Implementation Summary:**
+- Added spindle type field ('router' vs 'vfd_spindle') to distinguish thermal characteristics
+- Implemented temperature derating functionality:
+  - Router spindles: 25°C baseline, 2.5% derating per 10°C, minimum 70% power
+  - VFD spindles: 40°C baseline, 1.5% derating per 10°C, minimum 80% power
+- Updated power curves based on research:
+  - Dewalt router: Reduced minimum RPM power from 0.8kW to 0.7kW (more accurate)
+  - Makita router: Reduced minimum RPM power from 0.6kW to 0.5kW (more accurate)
+- Enhanced power calculations to include temperature effects
+- Added comprehensive test coverage for temperature derating
+- Power limiting now uses temperature-derated power values for accurate decisions
+
+## Total Estimated Research Effort: 27-35 hours (2-3 hours completed)
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)

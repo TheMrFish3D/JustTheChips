@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import type { Material, Machine, Spindle, Tool } from '../data/schemas/index.js'
 
-import { calculatePower, getToolPowerFactor, getSpindlePowerAtRPM, applyPowerLimiting } from './power.js'
+import { calculatePower, calculateTemperatureDerating, getToolPowerFactor, getSpindlePowerAtRPM, applyPowerLimiting } from './power.js'
 
 // Test fixtures
 const testMaterial: Material = {
@@ -38,6 +38,7 @@ const testSpindle: Spindle = {
   rpm_min: 1000,
   rpm_max: 24000,
   base_rpm: 18000,
+  type: 'vfd_spindle',
   power_curve: [
     { rpm: 1000, power_kw: 0.8 },
     { rpm: 6000, power_kw: 2.2 },
@@ -232,5 +233,144 @@ describe('applyPowerLimiting', () => {
 
     expect(result.feedRate).toBe(0)
     expect(result.mrr).toBe(0)
+  })
+})
+
+describe('calculateTemperatureDerating', () => {
+  const routerSpindle: Spindle = {
+    ...testSpindle,
+    id: 'router-test',
+    type: 'router'
+  }
+
+  const vfdSpindle: Spindle = {
+    ...testSpindle,
+    id: 'vfd-test',
+    type: 'vfd_spindle'
+  }
+
+  describe('Router temperature derating', () => {
+    it('should not derate at baseline temperature (25°C)', () => {
+      const result = calculateTemperatureDerating(routerSpindle, 25)
+      
+      expect(result.deratingFactor).toBe(1.0)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should not derate below baseline temperature', () => {
+      const result = calculateTemperatureDerating(routerSpindle, 20)
+      
+      expect(result.deratingFactor).toBe(1.0)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should derate power above baseline temperature', () => {
+      const result = calculateTemperatureDerating(routerSpindle, 35) // 10°C above baseline
+      
+      // 2.5% per 10°C = 2.5% derating = 97.5% power
+      expect(result.deratingFactor).toBeCloseTo(0.975, 3)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should generate warning at high temperature', () => {
+      const result = calculateTemperatureDerating(routerSpindle, 50) // 25°C above baseline
+      
+      // 2.5% × 2.5 = 6.25% derating = 93.75% power
+      expect(result.deratingFactor).toBeCloseTo(0.9375, 4)
+      expect(result.warnings).toHaveLength(1)
+      expect(result.warnings[0].type).toBe('temperature_derated')
+      expect(result.warnings[0].message).toContain('94%')
+      expect(result.warnings[0].message).toContain('50°C')
+    })
+
+    it('should limit minimum power to 70%', () => {
+      const result = calculateTemperatureDerating(routerSpindle, 145) // Extreme temperature
+      
+      expect(result.deratingFactor).toBe(0.7)
+      expect(result.warnings).toHaveLength(1)
+    })
+  })
+
+  describe('VFD spindle temperature derating', () => {
+    it('should not derate at baseline temperature (40°C)', () => {
+      const result = calculateTemperatureDerating(vfdSpindle, 40)
+      
+      expect(result.deratingFactor).toBe(1.0)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should not derate below baseline temperature', () => {
+      const result = calculateTemperatureDerating(vfdSpindle, 25)
+      
+      expect(result.deratingFactor).toBe(1.0)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should derate power above baseline temperature', () => {
+      const result = calculateTemperatureDerating(vfdSpindle, 50) // 10°C above baseline
+      
+      // 1.5% per 10°C = 1.5% derating = 98.5% power
+      expect(result.deratingFactor).toBeCloseTo(0.985, 3)
+      expect(result.warnings).toHaveLength(0)
+    })
+
+    it('should generate warning at high temperature', () => {
+      const result = calculateTemperatureDerating(vfdSpindle, 65) // 25°C above baseline
+      
+      // 1.5% × 2.5 = 3.75% derating = 96.25% power
+      expect(result.deratingFactor).toBeCloseTo(0.9625, 4)
+      expect(result.warnings).toHaveLength(1)
+      expect(result.warnings[0].type).toBe('temperature_derated')
+      expect(result.warnings[0].message).toContain('96%')
+      expect(result.warnings[0].message).toContain('65°C')
+    })
+
+    it('should limit minimum power to 80%', () => {
+      const result = calculateTemperatureDerating(vfdSpindle, 173) // Extreme temperature
+      
+      expect(result.deratingFactor).toBeCloseTo(0.8, 2)
+      expect(result.warnings).toHaveLength(1)
+    })
+  })
+})
+
+describe('calculatePower with temperature derating', () => {
+  it('should include temperature derating in power calculations', () => {
+    const result = calculatePower(testMaterial, testMachine, testSpindle, testTool, 7200, 12000, 50)
+
+    // Should have both original and derated power values
+    expect(result.powerAvailableW).toBeGreaterThan(0)
+    expect(result.powerAvailableDeratedW).toBeLessThan(result.powerAvailableW)
+    expect(result.temperatureDeratingFactor).toBeLessThan(1.0)
+  })
+
+  it('should use derated power for power limiting decisions', () => {
+    const routerSpindle: Spindle = {
+      ...testSpindle,
+      type: 'router',
+      rated_power_kw: 0.2, // Very low power to force limiting
+      power_curve: [
+        { rpm: 1000, power_kw: 0.1 },
+        { rpm: 12000, power_kw: 0.2 },
+        { rpm: 24000, power_kw: 0.15 }
+      ]
+    }
+
+    // High temperature + high power demand should trigger power limiting
+    const result = calculatePower(testMaterial, testMachine, routerSpindle, testTool, 20000, 12000, 50)
+
+    expect(result.powerLimited).toBe(true)
+    expect(result.scalingFactor).toBeDefined()
+    expect(result.scalingFactor).toBeLessThan(1.0)
+    expect(result.warnings.some(w => w.type === 'power_limited')).toBe(true)
+    expect(result.warnings.some(w => w.type === 'temperature_derated')).toBe(true)
+  })
+
+  it('should default to 25°C ambient temperature when not specified', () => {
+    const result1 = calculatePower(testMaterial, testMachine, testSpindle, testTool, 7200, 12000)
+    const result2 = calculatePower(testMaterial, testMachine, testSpindle, testTool, 7200, 12000, 25)
+
+    expect(result1.temperatureDeratingFactor).toBe(result2.temperatureDeratingFactor)
+    expect(result1.powerAvailableDeratedW).toBe(result2.powerAvailableDeratedW)
   })
 })

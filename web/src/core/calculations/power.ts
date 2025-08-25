@@ -5,7 +5,7 @@ import { clamp, lerp } from '../utils/math.js'
  * Warning types for power calculations
  */
 export interface PowerCalculationWarning {
-  type: 'power_limited'
+  type: 'power_limited' | 'temperature_derated'
   message: string
   severity: 'warning'
 }
@@ -18,10 +18,64 @@ export interface PowerCalculationResult {
   powerWithToolW: number     // Power with tool and machine factors
   spindleLossesW: number     // Spindle mechanical losses
   totalPowerRequiredW: number // Total power required
-  powerAvailableW: number    // Power available at current RPM
+  powerAvailableW: number    // Power available at current RPM (before temperature derating)
+  powerAvailableDeratedW: number // Power available after temperature derating
+  temperatureDeratingFactor: number // Temperature derating factor (1.0 = no derating)
   powerLimited: boolean       // Whether operation is power-limited
   scalingFactor?: number      // Feed rate scaling factor if power-limited
   warnings: PowerCalculationWarning[]
+}
+
+/**
+ * Calculate temperature derating factor for spindle power
+ * Based on ambient temperature and spindle type characteristics
+ */
+export function calculateTemperatureDerating(
+  spindle: Spindle,
+  ambientTempC: number = 25
+): { deratingFactor: number; warnings: PowerCalculationWarning[] } {
+  const warnings: PowerCalculationWarning[] = []
+  let deratingFactor = 1.0
+  
+  if (spindle.type === 'router') {
+    // Router spindles: baseline 25°C, 2.5% per 10°C above baseline
+    const baselineTemp = 25
+    const deratingRate = 0.025 // 2.5% per 10°C
+    
+    if (ambientTempC > baselineTemp) {
+      const tempDiff = ambientTempC - baselineTemp
+      deratingFactor = 1.0 - (tempDiff / 10) * deratingRate
+      deratingFactor = Math.max(deratingFactor, 0.7) // Minimum 70% power
+      
+      if (ambientTempC > 45) {
+        warnings.push({
+          type: 'temperature_derated',
+          message: `Router power derated to ${(deratingFactor * 100).toFixed(0)}% due to high ambient temperature (${ambientTempC}°C). Consider improving cooling.`,
+          severity: 'warning'
+        })
+      }
+    }
+  } else {
+    // VFD spindles: baseline 40°C, 1.5% per 10°C above baseline
+    const baselineTemp = 40
+    const deratingRate = 0.015 // 1.5% per 10°C
+    
+    if (ambientTempC > baselineTemp) {
+      const tempDiff = ambientTempC - baselineTemp
+      deratingFactor = 1.0 - (tempDiff / 10) * deratingRate
+      deratingFactor = Math.max(deratingFactor, 0.8) // Minimum 80% power
+      
+      if (ambientTempC > 60) {
+        warnings.push({
+          type: 'temperature_derated',
+          message: `VFD spindle power derated to ${(deratingFactor * 100).toFixed(0)}% due to high ambient temperature (${ambientTempC}°C). Check VFD cooling.`,
+          severity: 'warning'
+        })
+      }
+    }
+  }
+  
+  return { deratingFactor, warnings }
 }
 
 /**
@@ -86,7 +140,7 @@ export function getSpindlePowerAtRPM(spindle: Spindle, rpm: number): number {
 }
 
 /**
- * Calculate cutting power with all factors and power limiting
+ * Calculate cutting power with all factors, temperature derating, and power limiting
  * 
  * According to spec 3.2.5:
  * - specificEnergy = material-specific or category fallback
@@ -96,7 +150,8 @@ export function getSpindlePowerAtRPM(spindle: Spindle, rpm: number): number {
  * - spindleLosses = powerWithTool × 0.15
  * - totalPowerRequired = powerWithTool + spindleLosses
  * - powerAvailable = getSpindlePowerAtRPM(spindle, rpm)
- * - If totalPowerRequired > 0.9 × powerAvailable: scale and warn
+ * - Apply temperature derating to available power
+ * - If totalPowerRequired > 0.9 × powerAvailableDerated: scale and warn
  */
 export function calculatePower(
   material: Material,
@@ -104,7 +159,8 @@ export function calculatePower(
   spindle: Spindle,
   tool: Tool,
   mrrMm3Min: number,
-  rpm: number
+  rpm: number,
+  ambientTempC: number = 25
 ): PowerCalculationResult {
   // Validate inputs
   if (mrrMm3Min < 0) {
@@ -131,22 +187,29 @@ export function calculatePower(
   // Total power required
   const totalPowerRequiredW = powerWithToolW + spindleLossesW
 
-  // Get available power at current RPM
+  // Get available power at current RPM (before temperature derating)
   const powerAvailableW = getSpindlePowerAtRPM(spindle, rpm)
+  
+  // Apply temperature derating
+  const { deratingFactor, warnings: tempWarnings } = calculateTemperatureDerating(spindle, ambientTempC)
+  warnings.push(...tempWarnings)
+  
+  const powerAvailableDeratedW = powerAvailableW * deratingFactor
+  const temperatureDeratingFactor = deratingFactor
 
-  // Check if power limiting is needed (threshold at 90% of available power)
-  const powerThreshold = powerAvailableW * 0.9
+  // Check if power limiting is needed (threshold at 90% of derated available power)
+  const powerThreshold = powerAvailableDeratedW * 0.9
   const powerLimited = totalPowerRequiredW > powerThreshold
   
   let scalingFactor: number | undefined
 
   if (powerLimited) {
-    // Calculate scaling factor: (powerAvailable × 0.85) / totalPowerRequired
-    scalingFactor = (powerAvailableW * 0.85) / totalPowerRequiredW
+    // Calculate scaling factor: (powerAvailableDerated × 0.85) / totalPowerRequired
+    scalingFactor = (powerAvailableDeratedW * 0.85) / totalPowerRequiredW
     
     warnings.push({
       type: 'power_limited',
-      message: `Operation power-limited (${totalPowerRequiredW.toFixed(0)}W required > ${powerThreshold.toFixed(0)}W available). Feed rate scaled by ${(scalingFactor * 100).toFixed(1)}%`,
+      message: `Operation power-limited (${totalPowerRequiredW.toFixed(0)}W required > ${powerThreshold.toFixed(0)}W available after derating). Feed rate scaled by ${(scalingFactor * 100).toFixed(1)}%`,
       severity: 'warning'
     })
   }
@@ -157,6 +220,8 @@ export function calculatePower(
     spindleLossesW,
     totalPowerRequiredW,
     powerAvailableW,
+    powerAvailableDeratedW,
+    temperatureDeratingFactor,
     powerLimited,
     scalingFactor,
     warnings

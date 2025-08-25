@@ -32,6 +32,7 @@ describe('Speed calculations', () => {
     rpm_min: 100,
     rpm_max: 24000,
     base_rpm: 3000,
+    type: 'vfd_spindle',
     power_curve: [
       { rpm: 100, power_kw: 5.0 },
       { rpm: 3000, power_kw: 5.0 },

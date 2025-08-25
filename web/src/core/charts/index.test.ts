@@ -17,6 +17,7 @@ describe('Chart computation utilities', () => {
     rpm_min: 6000,
     rpm_max: 24000,
     base_rpm: 10000,
+    type: 'vfd_spindle',
     power_curve: [
       { rpm: 6000, power_kw: 1.1 },
       { rpm: 12000, power_kw: 2.2 },
