@@ -1,28 +1,28 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
-
 import './App.css'
-import About from './pages/About'
-import Calculator from './pages/Calculator'
-import Libraries from './pages/Libraries'
-import Settings from './pages/Settings'
+import { TabbedCalculatorLayout } from './components/layout/TabbedCalculatorLayout'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <header style={{ display: 'flex', gap: 12, padding: 12 }}>
-        <Link to="/">Calculator</Link>
-        <Link to="/libraries">Libraries</Link>
-        <Link to="/settings">Settings</Link>
-        <Link to="/about">About</Link>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header with title */}
+      <header style={{ 
+        background: '#2563eb', 
+        color: 'white', 
+        padding: '12px 24px',
+        textAlign: 'center'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>
+          ⚙️ JustTheChip CNC Calculator
+        </h1>
+        <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
+          Educational hobbyist CNC machining calculator with physics-based modeling
+        </p>
       </header>
-      <main style={{ padding: 12 }}>
-        <Routes>
-          <Route path="/" element={<Calculator />} />
-          <Route path="/libraries" element={<Libraries />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
+      
+      {/* Main calculator interface */}
+      <main style={{ flex: 1, overflow: 'hidden' }}>
+        <TabbedCalculatorLayout />
       </main>
-    </BrowserRouter>
+    </div>
   )
 }

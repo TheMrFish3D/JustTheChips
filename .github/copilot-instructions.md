@@ -180,3 +180,25 @@ export function calculateRPM(diameter: number, surfaceSpeed: number): number {
 - **Performance**: Fast builds and hot reload during development
 
 This project is in early development stage. Most calculation logic and data schemas are not yet implemented. Focus on building the foundation according to the specifications in `docs/`.
+
+## Research Task Management
+
+### Research Tasks File
+- **Always check** `docs/research-tasks.md` when working on issues to see if there are related research tasks
+- **Highlight** any new research needs that should be added to the research tasks file
+- **Remove completed tasks** from the research tasks file when you complete a research issue
+- **Create new research issues** when you identify research needs that require significant compute time or domain expertise
+
+### Research Task Workflow
+1. Check `docs/research-tasks.md` at the start of each issue
+2. If your issue relates to a research task, note it in your progress reports
+3. When completing research tasks, update the relevant data files and documentation
+4. Remove the completed task from `docs/research-tasks.md`
+5. If you identify new research needs, add them to the file and suggest creating separate issues
+
+### Research Priority Guidelines
+- **High Priority**: Core machine rigidity modeling, fundamental educational content
+- **Medium Priority**: Extended educational content, optimization algorithms
+- **Low Priority**: Advanced features, validation studies
+
+Research tasks can be run concurrently by different agents to accelerate development. Always coordinate through the research tasks file to avoid duplication.
