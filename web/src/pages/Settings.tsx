@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react'
 
-import { useCalculatorStore } from '../store/index.js'
 import { materials, machines, tools, spindles } from '../core/data/index.js'
-import { exportBundle, downloadBundle, createFileImportInput, type ImportResult } from '../core/utils/index.js'
 import type { Settings, Libraries } from '../core/data/schemas/index.js'
+import { exportBundle, downloadBundle, createFileImportInput, type ImportResult } from '../core/utils/index.js'
+import { useCalculatorStore } from '../store/index.js'
 
 export default function Settings() {
   const [importStatus, setImportStatus] = useState<{

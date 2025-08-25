@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+import type { Bundle, Settings, Libraries } from '../data/schemas/bundle.js'
 
 import {
   exportBundle,
@@ -6,7 +9,6 @@ import {
   importBundle,
   createFileImportInput
 } from './import-export.js'
-import type { Bundle, Settings, Libraries } from '../data/schemas/bundle.js'
 
 // Mock DOM APIs
 const mockCreateElement = vi.fn()

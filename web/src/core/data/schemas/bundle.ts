@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
 import { InputsSchema } from './inputs.js'
-import { MaterialSchema } from './material.js'
 import { MachineSchema } from './machine.js'
-import { ToolSchema } from './tool.js'
+import { MaterialSchema } from './material.js'
 import { SpindleSchema } from './spindle.js'
+import { ToolSchema } from './tool.js'
 
 /**
  * Schema for application settings that can be exported/imported

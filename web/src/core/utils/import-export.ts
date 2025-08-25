@@ -1,8 +1,8 @@
 import type { ZodIssue } from 'zod'
 
+import { loadAllData } from '../data/loaders/index.js'
 import type { Bundle, Settings, Libraries } from '../data/schemas/bundle.js'
 import { safeParseBundle } from '../data/schemas/bundle.js'
-import { loadAllData } from '../data/loaders/index.js'
 
 /**
  * Result of an import operation
@@ -133,7 +133,7 @@ export function createFileImportInput(
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string
-        const data = JSON.parse(content)
+        const data: unknown = JSON.parse(content)
         const result = importBundle(data)
         onImport(result)
       } catch (err) {
