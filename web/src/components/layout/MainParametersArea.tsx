@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { CutType } from '../../core/data/schemas/inputs.js'
 import { useCalculatorStore } from '../../store/index.js'
 import { useInputValidation } from '../../store/useInputValidation.js'
-import { NumericInputWithUnits } from '../ui/index.js'
+import { NumericInputWithUnits, EducationalTooltip } from '../ui/index.js'
 
 const cutTypes: { value: CutType; label: string }[] = [
   { value: 'slot', label: 'Slotting' },
@@ -85,15 +85,17 @@ export function MainParametersArea() {
               
               {/* Cut Type Selection */}
               <div>
-                <label htmlFor="cutType" style={{ 
-                  display: 'block', 
-                  marginBottom: '6px', 
-                  fontWeight: '600',
-                  color: '#374151'
-                }}>
-                  Cut Type
-                  <span style={{ color: '#ef4444' }}>*</span>
-                </label>
+                <EducationalTooltip contentKey="cutType" position="bottom">
+                  <label htmlFor="cutType" style={{ 
+                    display: 'block', 
+                    marginBottom: '6px', 
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}>
+                    Cut Type
+                    <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                </EducationalTooltip>
                 <select
                   id="cutType"
                   value={store.cutType || ''}
@@ -116,33 +118,57 @@ export function MainParametersArea() {
               </div>
               
               {/* Radial Engagement */}
-              <NumericInputWithUnits
-                id="user_woc_mm"
-                label="Radial Engagement (%)"
-                unit="%"
-                value={store.user_woc_mm ? (store.user_woc_mm * 100) : undefined}
-                min={1}
-                max={100}
-                step={1}
-                placeholder="40"
-                onChange={(value) => store.setInput('user_woc_mm', value ? value / 100 : undefined)}
-                error={getFieldError('user_woc_mm')}
-                warning={getFieldWarnings('user_woc_mm')[0]?.message}
-              />
+              <div>
+                <EducationalTooltip contentKey="radialEngagement" position="bottom">
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '6px', 
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}>
+                    Radial Engagement (%)
+                  </label>
+                </EducationalTooltip>
+                <NumericInputWithUnits
+                  id="user_woc_mm"
+                  label=""
+                  unit="%"
+                  value={store.user_woc_mm ? (store.user_woc_mm * 100) : undefined}
+                  min={1}
+                  max={100}
+                  step={1}
+                  placeholder="40"
+                  onChange={(value) => store.setInput('user_woc_mm', value ? value / 100 : undefined)}
+                  error={getFieldError('user_woc_mm')}
+                  warning={getFieldWarnings('user_woc_mm')[0]?.message}
+                />
+              </div>
               
               {/* Aggressiveness */}
-              <NumericInputWithUnits
-                id="aggressiveness"
-                label="Aggressiveness"
-                value={store.aggressiveness}
-                min={0.1}
-                max={3.0}
-                step={0.1}
-                placeholder="1.0"
-                onChange={(value) => store.setInput('aggressiveness', value)}
-                error={getFieldError('aggressiveness')}
-                warning={getFieldWarnings('aggressiveness')[0]?.message}
-              />
+              <div>
+                <EducationalTooltip contentKey="aggressiveness" position="bottom">
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '6px', 
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}>
+                    Aggressiveness
+                  </label>
+                </EducationalTooltip>
+                <NumericInputWithUnits
+                  id="aggressiveness"
+                  label=""
+                  value={store.aggressiveness}
+                  min={0.1}
+                  max={3.0}
+                  step={0.1}
+                  placeholder="1.0"
+                  onChange={(value) => store.setInput('aggressiveness', value)}
+                  error={getFieldError('aggressiveness')}
+                  warning={getFieldWarnings('aggressiveness')[0]?.message}
+                />
+              </div>
               
               {/* Target Finish */}
               <div>

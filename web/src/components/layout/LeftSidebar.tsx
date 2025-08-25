@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { materials, machines, tools, spindles } from '../../core/data/index.js'
 import { useCalculatorStore } from '../../store/index.js'
 import { useInputValidation } from '../../store/useInputValidation.js'
-import { EntitySelector } from '../ui/index.js'
+import { EntitySelector, EducationalTooltip } from '../ui/index.js'
 
 import { MachineConfigModal } from './MachineConfigModal.js'
 
@@ -83,9 +83,11 @@ export function LeftSidebar() {
           marginBottom: '16px',
           background: '#fafafa'
         }}>
-          <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
-            Machine Setup
-          </h3>
+          <EducationalTooltip contentKey="machineRigidity" position="right">
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
+              Machine Setup
+            </h3>
+          </EducationalTooltip>
           
           <EntitySelector
             id="machineId"
