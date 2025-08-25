@@ -123,7 +123,8 @@ export function calculatePower(
 
   // Apply tool power factor and machine rigidity factor
   const toolPowerFactor = getToolPowerFactor(tool.type)
-  const powerWithToolW = cuttingPowerW * toolPowerFactor * machine.rigidity_factor
+  const rigidityFactor = machine.rigidity_factor
+  const powerWithToolW = cuttingPowerW * toolPowerFactor * rigidityFactor
 
   // Calculate spindle mechanical losses (15% of cutting power)
   const spindleLossesW = powerWithToolW * 0.15
