@@ -55,16 +55,125 @@ export const MATERIAL_MODULUS_GPA = {
 } as const
 
 /**
+ * Hobby machine specific deflection limits based on machine class
+ * More conservative than industrial standards due to reduced rigidity
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const HOBBY_DEFLECTION_LIMITS = {
+  ultra_light: {
+    precision: 0.008,  // Very tight work impossible on ultra-light machines
+    general: 0.015,    // Stricter than standard 0.02mm
+    rough: 0.03        // Stricter than standard 0.05mm
+  },
+  medium_hobby: {
+    precision: 0.01,
+    general: 0.02,
+    rough: 0.04
+  },
+  heavy_hobby: {
+    precision: 0.015,
+    general: 0.025,
+    rough: 0.05
+  },
+  entry_commercial: {
+    precision: 0.02,   // Standard industrial limits
+    general: 0.03,
+    rough: 0.06
+  }
+} as const
+
+/**
+ * Hobby machine tool stiffness recommendations
+ * L/D (Length to Diameter) ratios for different precision requirements
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const HOBBY_TOOL_STIFFNESS_GUIDELINES = {
+  ultra_light: {
+    precision: 2.5,    // Very short tools required
+    general: 3.0,
+    rough: 4.0
+  },
+  medium_hobby: {
+    precision: 3.0,
+    general: 4.0,
+    rough: 5.0
+  },
+  heavy_hobby: {
+    precision: 4.0,
+    general: 5.0,
+    rough: 6.5
+  },
+  entry_commercial: {
+    precision: 5.0,    // Near-industrial capability
+    general: 6.0,
+    rough: 8.0
+  }
+} as const
+
+/**
+ * Classify machine rigidity for deflection calculations
+ */
+export function getHobbyMachineClass(rigidityFactor: number): keyof typeof HOBBY_DEFLECTION_LIMITS {
+  if (rigidityFactor < 0.2) return 'ultra_light'
+  if (rigidityFactor < 0.4) return 'medium_hobby'
+  if (rigidityFactor < 0.7) return 'heavy_hobby'
+  return 'entry_commercial'
+}
+
+/**
+ * Get deflection limits for a hobby machine and precision requirement
+ */
+export function getHobbyDeflectionLimits(
+  rigidityFactor: number,
+  precisionLevel: 'precision' | 'general' | 'rough' = 'general'
+): { warning: number; danger: number } {
+  const machineClass = getHobbyMachineClass(rigidityFactor)
+  const limit = HOBBY_DEFLECTION_LIMITS[machineClass][precisionLevel]
+  
+  return {
+    warning: limit * 0.75,  // Warning at 75% of limit
+    danger: limit           // Danger at limit
+  }
+}
+
+/**
+ * Evaluate tool suitability for hobby machine based on L/D ratio
+ */
+export function evaluateHobbyToolSuitability(
+  toolDiameter: number,
+  toolStickout: number,
+  rigidityFactor: number,
+  precisionLevel: 'precision' | 'general' | 'rough' = 'general'
+): {
+  isRecommended: boolean
+  actualLdRatio: number
+  recommendedMaxLdRatio: number
+  warning?: string
+} {
+  const machineClass = getHobbyMachineClass(rigidityFactor)
+  const maxLdRatio = HOBBY_TOOL_STIFFNESS_GUIDELINES[machineClass][precisionLevel]
+  const actualLdRatio = toolStickout / toolDiameter
+  const isRecommended = actualLdRatio <= maxLdRatio
+  
+  let warning: string | undefined
+  if (!isRecommended) {
+    warning = `Tool L/D ratio (${actualLdRatio.toFixed(1)}) exceeds recommendation (${maxLdRatio}) for ${machineClass.replace('_', ' ')} machine ${precisionLevel} work. Consider shorter tool or larger diameter.`
+  }
+  
+  return {
+    isRecommended,
+    actualLdRatio,
+    recommendedMaxLdRatio: maxLdRatio,
+    warning
+  }
+}
+
+/**
  * Default holder compliance in mm/N
  * From spec: default 0.002 mm/N
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const DEFAULT_HOLDER_COMPLIANCE_MM_PER_N = 0.002
-
-/**
- * Estimate tool mass for natural frequency calculation
- * Based on tool diameter and length, assuming typical tool densities
- */
 export function estimateToolMass(tool: Tool): number {
   // Carbide density ~14.5 g/cm³, HSS ~8.0 g/cm³
   const density = tool.material.toLowerCase().includes('carbide') ? 14.5 : 8.0
@@ -193,13 +302,16 @@ export function calculateDynamicAmplification(
 /**
  * Calculate complete tool deflection with static and dynamic components
  * Per spec 3.2.7: dynamicDeflection = staticDeflection × G(ratio)
+ * Enhanced with hobby machine specific deflection limits
  */
 export function calculateDeflection(
   tool: Tool,
   forceN: number,
   rpm: number,
   effectiveFlutes: number,
-  holderComplianceMmPerN: number = DEFAULT_HOLDER_COMPLIANCE_MM_PER_N
+  holderComplianceMmPerN: number = DEFAULT_HOLDER_COMPLIANCE_MM_PER_N,
+  machineRigidityFactor?: number,
+  precisionLevel: 'precision' | 'general' | 'rough' = 'general'
 ): DeflectionCalculationResult {
   const warnings: DeflectionCalculationWarning[] = []
   
@@ -213,19 +325,54 @@ export function calculateDeflection(
   const totalDeflectionMm = staticDeflection.totalStaticDeflectionMm * dynamicAmplification.amplificationFactor
   
   // Generate warnings based on deflection thresholds
-  // Per spec: >0.05 mm (danger), >0.02 mm (warning)
-  if (totalDeflectionMm > 0.05) {
-    warnings.push({
-      type: 'deflection_danger',
-      message: `Dangerous tool deflection (${totalDeflectionMm.toFixed(3)} mm > 0.05 mm)`,
-      severity: 'danger'
-    })
-  } else if (totalDeflectionMm > 0.02) {
-    warnings.push({
-      type: 'deflection_warning',
-      message: `High tool deflection (${totalDeflectionMm.toFixed(3)} mm > 0.02 mm)`,
-      severity: 'warning'
-    })
+  if (machineRigidityFactor !== undefined) {
+    // Use hobby machine specific limits
+    const limits = getHobbyDeflectionLimits(machineRigidityFactor, precisionLevel)
+    
+    if (totalDeflectionMm > limits.danger) {
+      warnings.push({
+        type: 'deflection_danger',
+        message: `Dangerous tool deflection (${totalDeflectionMm.toFixed(3)} mm > ${limits.danger.toFixed(3)} mm) for hobby machine ${precisionLevel} work`,
+        severity: 'danger'
+      })
+    } else if (totalDeflectionMm > limits.warning) {
+      warnings.push({
+        type: 'deflection_warning',
+        message: `High tool deflection (${totalDeflectionMm.toFixed(3)} mm > ${limits.warning.toFixed(3)} mm) for hobby machine ${precisionLevel} work`,
+        severity: 'warning'
+      })
+    }
+    
+    // Add tool suitability evaluation
+    const toolEvaluation = evaluateHobbyToolSuitability(
+      tool.diameter_mm,
+      tool.stickout_mm,
+      machineRigidityFactor,
+      precisionLevel
+    )
+    
+    if (!toolEvaluation.isRecommended && toolEvaluation.warning) {
+      warnings.push({
+        type: 'deflection_warning',
+        message: toolEvaluation.warning,
+        severity: 'warning'
+      })
+    }
+  } else {
+    // Use standard industrial limits
+    if (totalDeflectionMm > 0.05) {
+      warnings.push({
+        type: 'deflection_danger',
+        message: `Dangerous tool deflection (${totalDeflectionMm.toFixed(3)} mm > 0.05 mm)`,
+        severity: 'danger'
+      })
+    } else if (totalDeflectionMm > 0.02) {
+      warnings.push({
+        type: 'deflection_warning',
+        message: `High tool deflection (${totalDeflectionMm.toFixed(3)} mm > 0.02 mm)`,
+        severity: 'warning'
+      })
+    }
   }
   
   return {
