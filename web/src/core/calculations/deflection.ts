@@ -235,3 +235,177 @@ export function calculateDeflection(
     warnings
   }
 }
+
+/**
+ * Configuration for diameter/stickout optimization
+ */
+export interface DeflectionOptimizationConfig {
+  targetDeflectionMm: number        // Target deflection to achieve
+  forceN: number                    // Expected cutting force
+  rpm: number                       // Operating RPM
+  effectiveFlutes: number           // Number of effective flutes
+  toolType?: string                 // Optional tool type filter
+  diameterRangeMm?: [number, number] // Diameter range to consider (default: 3-25mm)
+  stickoutRangeMm?: [number, number] // Stickout range to consider (default: 10-100mm)
+  maxSuggestions?: number           // Maximum number of suggestions (default: 5)
+  holderComplianceMmPerN?: number   // Holder compliance (default: 0.002)
+}
+
+/**
+ * Suggested tool configuration for target deflection
+ */
+export interface ToolDeflectionSuggestion {
+  diameterMm: number               // Suggested tool diameter
+  stickoutMm: number               // Suggested stickout length
+  predictedDeflectionMm: number    // Predicted deflection with this configuration
+  deflectionError: number          // Absolute error from target (mm)
+  relativeError: number            // Relative error from target (%)
+  isWithinTolerance: boolean       // Whether within 10% of target
+  rigidityScore: number            // Relative rigidity score (higher = more rigid)
+}
+
+/**
+ * Result of deflection optimization
+ */
+export interface DeflectionOptimizationResult {
+  targetDeflectionMm: number
+  suggestions: ToolDeflectionSuggestion[]
+  searchRanges: {
+    diameterMm: [number, number]
+    stickoutMm: [number, number]
+  }
+  totalEvaluations: number
+}
+
+/**
+ * Suggest optimal diameter/stickout combinations for a target deflection
+ * Evaluates different tool configurations to find those closest to target deflection
+ */
+export function suggestToolsForTargetDeflection(config: DeflectionOptimizationConfig): DeflectionOptimizationResult {
+  const {
+    targetDeflectionMm,
+    forceN,
+    rpm,
+    effectiveFlutes,
+    toolType = 'endmill_flat',
+    diameterRangeMm = [3, 25],      // Reasonable range for most endmills
+    stickoutRangeMm = [10, 100],    // Practical stickout range
+    maxSuggestions = 5,
+    holderComplianceMmPerN = DEFAULT_HOLDER_COMPLIANCE_MM_PER_N
+  } = config
+
+  const suggestions: ToolDeflectionSuggestion[] = []
+  const [minDiameter, maxDiameter] = diameterRangeMm
+  const [minStickout, maxStickout] = stickoutRangeMm
+  
+  // Define evaluation grid - balance between accuracy and performance
+  const diameterSteps = 15  // 15 diameter steps
+  const stickoutSteps = 20  // 20 stickout steps
+  
+  const diameterStep = (maxDiameter - minDiameter) / (diameterSteps - 1)
+  const stickoutStep = (maxStickout - minStickout) / (stickoutSteps - 1)
+  
+  let totalEvaluations = 0
+
+  // Evaluate each combination
+  for (let d = 0; d < diameterSteps; d++) {
+    for (let s = 0; s < stickoutSteps; s++) {
+      const diameter = minDiameter + (d * diameterStep)
+      const stickout = minStickout + (s * stickoutStep)
+      
+      // Create test tool with current configuration
+      const testTool: Tool = {
+        id: 'optimization_test',
+        type: toolType as Tool['type'],
+        diameter_mm: diameter,
+        flutes: effectiveFlutes,
+        coating: 'carbide',
+        stickout_mm: stickout,
+        material: 'carbide',
+        default_doc_mm: diameter * 0.1,
+        default_woc_mm: diameter * 0.5
+      }
+      
+      // Calculate deflection for this configuration
+      const deflectionResult = calculateDeflection(testTool, forceN, rpm, effectiveFlutes, holderComplianceMmPerN)
+      const predictedDeflection = deflectionResult.totalDeflectionMm
+      
+      // Calculate error metrics
+      const deflectionError = Math.abs(predictedDeflection - targetDeflectionMm)
+      const relativeError = (deflectionError / targetDeflectionMm) * 100
+      const isWithinTolerance = relativeError <= 10 // Within 10% is considered good
+      
+      // Calculate rigidity score (inverse of deflection per unit force)
+      const rigidityScore = forceN / predictedDeflection
+      
+      const suggestion: ToolDeflectionSuggestion = {
+        diameterMm: Math.round(diameter * 10) / 10,  // Round to 0.1mm
+        stickoutMm: Math.round(stickout * 10) / 10,  // Round to 0.1mm
+        predictedDeflectionMm: Math.round(predictedDeflection * 1000) / 1000, // Round to 0.001mm
+        deflectionError: Math.round(deflectionError * 1000) / 1000,
+        relativeError: Math.round(relativeError * 10) / 10,
+        isWithinTolerance,
+        rigidityScore: Math.round(rigidityScore)
+      }
+      
+      suggestions.push(suggestion)
+      totalEvaluations++
+    }
+  }
+  
+  // Sort by deflection error (best matches first)
+  suggestions.sort((a, b) => a.deflectionError - b.deflectionError)
+  
+  // Return top suggestions
+  return {
+    targetDeflectionMm,
+    suggestions: suggestions.slice(0, maxSuggestions),
+    searchRanges: {
+      diameterMm: diameterRangeMm,
+      stickoutMm: stickoutRangeMm
+    },
+    totalEvaluations
+  }
+}
+
+/**
+ * Optimize an existing tool configuration for better deflection performance
+ * Given a tool and target deflection, suggest diameter and stickout adjustments
+ */
+export function optimizeToolConfiguration(
+  baseTool: Tool,
+  targetDeflectionMm: number,
+  forceN: number,
+  rpm: number,
+  effectiveFlutes: number,
+  holderComplianceMmPerN: number = DEFAULT_HOLDER_COMPLIANCE_MM_PER_N
+): DeflectionOptimizationResult {
+  // Define search range around current tool configuration
+  const currentDiameter = baseTool.diameter_mm
+  const currentStickout = baseTool.stickout_mm
+  
+  // Search within ±50% of current diameter, ±30% of current stickout
+  const diameterRange: [number, number] = [
+    Math.max(currentDiameter * 0.5, 3),    // Don't go below 3mm
+    Math.min(currentDiameter * 1.5, 25)    // Don't go above 25mm
+  ]
+  
+  const stickoutRange: [number, number] = [
+    Math.max(currentStickout * 0.7, 10),   // Don't go below 10mm
+    Math.min(currentStickout * 1.3, 100)   // Don't go above 100mm
+  ]
+  
+  const config: DeflectionOptimizationConfig = {
+    targetDeflectionMm,
+    forceN,
+    rpm,
+    effectiveFlutes,
+    toolType: baseTool.type,
+    diameterRangeMm: diameterRange,
+    stickoutRangeMm: stickoutRange,
+    maxSuggestions: 3, // Fewer suggestions for optimization
+    holderComplianceMmPerN
+  }
+  
+  return suggestToolsForTargetDeflection(config)
+}
