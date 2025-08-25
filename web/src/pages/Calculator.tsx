@@ -1,12 +1,20 @@
 
 import { ChartsSection } from '../components/calculator/ChartsSection.js'
+import { DeflectionOptimizationSection } from '../components/calculator/DeflectionOptimizationSection.js'
 import { InputsSection } from '../components/calculator/InputsSection.js'
 import { ResultsSection } from '../components/calculator/ResultsSection.js'
+import { useCalculatorStore } from '../store/index.js'
 import { useCalculation } from '../store/useCalculation.js'
 
 export default function Calculator() {
   // Hook up debounced calculations
   const calculation = useCalculation()
+  const store = useCalculatorStore()
+  
+  // Get current parameters for deflection optimization
+  const currentForce = calculation.results?.force_N
+  const currentRPM = calculation.results?.rpm
+  const currentFlutes = store.override_flutes
   
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -24,6 +32,12 @@ export default function Calculator() {
       />
       
       <ChartsSection />
+      
+      <DeflectionOptimizationSection 
+        currentForce={currentForce}
+        currentRPM={currentRPM}
+        currentFlutes={currentFlutes}
+      />
       
       {calculation.lastCalculationTime && (
         <div style={{ 

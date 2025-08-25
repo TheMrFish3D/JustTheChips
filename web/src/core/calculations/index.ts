@@ -56,12 +56,17 @@ export {
   calculateDynamicAmplification,
   getYoungsModulus,
   estimateToolMass,
+  suggestToolsForTargetDeflection,
+  optimizeToolConfiguration,
   MATERIAL_MODULUS_GPA,
   DEFAULT_HOLDER_COMPLIANCE_MM_PER_N,
   type DeflectionCalculationResult,
   type StaticDeflectionResult,
   type DynamicAmplificationResult,
-  type DeflectionCalculationWarning
+  type DeflectionCalculationWarning,
+  type DeflectionOptimizationConfig,
+  type ToolDeflectionSuggestion,
+  type DeflectionOptimizationResult
 } from './deflection.js'
 
 // Export validation functions

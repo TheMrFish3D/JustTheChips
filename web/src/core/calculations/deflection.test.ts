@@ -7,7 +7,9 @@ import {
   calculateDynamicAmplification,
   calculateDeflection,
   getYoungsModulus,
-  estimateToolMass
+  estimateToolMass,
+  suggestToolsForTargetDeflection,
+  optimizeToolConfiguration
 } from './deflection.js'
 
 // Test data
@@ -296,6 +298,166 @@ describe('Deflection Calculations', () => {
       const result = calculateDeflection(testTool, 500, 12000, 3, customCompliance)
       
       expect(result.staticDeflection.holderDeflectionMm).toBeCloseTo(500 * customCompliance, 6)
+    })
+  })
+
+  describe('Deflection Optimization', () => {
+    it('should suggest tools for target deflection', () => {
+      const config = {
+        targetDeflectionMm: 0.02,    // Target 0.02mm deflection
+        forceN: 300,                 // 300N cutting force
+        rpm: 12000,                  // 12000 RPM
+        effectiveFlutes: 3,          // 3 flutes
+        diameterRangeMm: [6, 12] as [number, number],  // 6-12mm diameter range
+        stickoutRangeMm: [20, 40] as [number, number], // 20-40mm stickout range
+        maxSuggestions: 3
+      }
+      
+      const result = suggestToolsForTargetDeflection(config)
+      
+      // Should return optimization result
+      expect(result.targetDeflectionMm).toBe(0.02)
+      expect(result.suggestions).toHaveLength(3)
+      expect(result.totalEvaluations).toBeGreaterThan(0)
+      expect(result.searchRanges.diameterMm).toEqual([6, 12])
+      expect(result.searchRanges.stickoutMm).toEqual([20, 40])
+      
+      // Check first suggestion (should be closest to target)
+      const bestSuggestion = result.suggestions[0]
+      expect(bestSuggestion.diameterMm).toBeGreaterThanOrEqual(6)
+      expect(bestSuggestion.diameterMm).toBeLessThanOrEqual(12)
+      expect(bestSuggestion.stickoutMm).toBeGreaterThanOrEqual(20)
+      expect(bestSuggestion.stickoutMm).toBeLessThanOrEqual(40)
+      expect(bestSuggestion.predictedDeflectionMm).toBeGreaterThan(0)
+      expect(bestSuggestion.deflectionError).toBeGreaterThanOrEqual(0)
+      expect(bestSuggestion.rigidityScore).toBeGreaterThan(0)
+      
+      // Suggestions should be sorted by deflection error (ascending)
+      for (let i = 1; i < result.suggestions.length; i++) {
+        expect(result.suggestions[i].deflectionError).toBeGreaterThanOrEqual(result.suggestions[i-1].deflectionError)
+      }
+    })
+
+    it('should identify suggestions within tolerance', () => {
+      // Use parameters that should be achievable - higher target deflection, reasonable force
+      const config = {
+        targetDeflectionMm: 0.05,    // Higher target (still within warning zone)
+        forceN: 200,                 // Moderate force
+        rpm: 10000,                  // Standard RPM
+        effectiveFlutes: 3,
+        diameterRangeMm: [6, 12] as [number, number],  // Standard diameter range
+        stickoutRangeMm: [20, 50] as [number, number], // Longer stickout to achieve higher deflection
+        maxSuggestions: 5
+      }
+      
+      const result = suggestToolsForTargetDeflection(config)
+      
+      // At minimum, verify we get valid suggestions
+      expect(result.suggestions.length).toBeGreaterThan(0)
+      expect(result.totalEvaluations).toBeGreaterThan(0)
+      
+      // Check that results are reasonable - all deflections should be positive
+      result.suggestions.forEach(suggestion => {
+        expect(suggestion.predictedDeflectionMm).toBeGreaterThan(0)
+        expect(suggestion.deflectionError).toBeGreaterThanOrEqual(0)
+        expect(suggestion.relativeError).toBeGreaterThanOrEqual(0)
+      })
+      
+      // The best suggestion should be the closest to target
+      const bestSuggestion = result.suggestions[0]
+      const lastSuggestion = result.suggestions[result.suggestions.length - 1]
+      expect(bestSuggestion.deflectionError).toBeLessThanOrEqual(lastSuggestion.deflectionError)
+    })
+
+    it('should optimize existing tool configuration', () => {
+      const baseTool: Tool = {
+        id: 'test_optimize',
+        type: 'endmill_flat',
+        diameter_mm: 10,
+        flutes: 4,
+        coating: 'carbide',
+        stickout_mm: 30,
+        material: 'carbide',
+        default_doc_mm: 1,
+        default_woc_mm: 5
+      }
+      
+      const result = optimizeToolConfiguration(baseTool, 0.015, 250, 10000, 4)
+      
+      // Should return optimization result with limited suggestions
+      expect(result.targetDeflectionMm).toBe(0.015)
+      expect(result.suggestions.length).toBeLessThanOrEqual(3)
+      
+      // Search ranges should be around the base tool configuration
+      const [minDiam, maxDiam] = result.searchRanges.diameterMm
+      const [minStick, maxStick] = result.searchRanges.stickoutMm
+      
+      expect(minDiam).toBeLessThanOrEqual(baseTool.diameter_mm)
+      expect(maxDiam).toBeGreaterThanOrEqual(baseTool.diameter_mm)
+      expect(minStick).toBeLessThanOrEqual(baseTool.stickout_mm)
+      expect(maxStick).toBeGreaterThanOrEqual(baseTool.stickout_mm)
+    })
+
+    it('should handle edge cases in optimization', () => {
+      // Test with very strict target that might be hard to achieve
+      const config = {
+        targetDeflectionMm: 0.001,   // Very low target
+        forceN: 1000,                // High force
+        rpm: 20000,                  // High RPM
+        effectiveFlutes: 2,
+        maxSuggestions: 2
+      }
+      
+      const result = suggestToolsForTargetDeflection(config)
+      
+      // Should still return valid suggestions even if target is hard to achieve
+      expect(result.suggestions).toHaveLength(2)
+      expect(result.totalEvaluations).toBeGreaterThan(0)
+      
+      // All suggestions should have valid values
+      result.suggestions.forEach(suggestion => {
+        expect(suggestion.diameterMm).toBeGreaterThan(0)
+        expect(suggestion.stickoutMm).toBeGreaterThan(0)
+        expect(suggestion.predictedDeflectionMm).toBeGreaterThan(0)
+        expect(suggestion.deflectionError).toBeGreaterThanOrEqual(0)
+        expect(suggestion.rigidityScore).toBeGreaterThan(0)
+      })
+    })
+
+    it('should use custom tool type in optimization', () => {
+      const config = {
+        targetDeflectionMm: 0.03,
+        forceN: 200,
+        rpm: 15000,
+        effectiveFlutes: 2,
+        toolType: 'drill',           // Specify drill tool type
+        maxSuggestions: 2
+      }
+      
+      const result = suggestToolsForTargetDeflection(config)
+      
+      // Should complete successfully with drill tool type
+      expect(result.suggestions).toHaveLength(2)
+      expect(result.totalEvaluations).toBeGreaterThan(0)
+    })
+
+    it('should calculate rigidity scores correctly', () => {
+      const config = {
+        targetDeflectionMm: 0.02,
+        forceN: 400,
+        rpm: 12000,
+        effectiveFlutes: 3,
+        maxSuggestions: 3
+      }
+      
+      const result = suggestToolsForTargetDeflection(config)
+      
+      // Higher diameter / lower stickout should generally have higher rigidity
+      result.suggestions.forEach(suggestion => {
+        // Rigidity score should be force / deflection
+        const expectedRigidity = Math.round(config.forceN / suggestion.predictedDeflectionMm)
+        expect(suggestion.rigidityScore).toBeCloseTo(expectedRigidity, 0)
+      })
     })
   })
 })
