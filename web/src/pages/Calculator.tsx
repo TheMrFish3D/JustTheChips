@@ -1,4 +1,5 @@
 
+import { ChartsSection } from '../components/calculator/ChartsSection.js'
 import { InputsSection } from '../components/calculator/InputsSection.js'
 import { ResultsSection } from '../components/calculator/ResultsSection.js'
 import { useCalculation } from '../store/useCalculation.js'
@@ -21,6 +22,8 @@ export default function Calculator() {
         isCalculating={calculation.isCalculating}
         error={calculation.error}
       />
+      
+      <ChartsSection />
       
       {calculation.lastCalculationTime && (
         <div style={{ 
