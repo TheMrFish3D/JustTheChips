@@ -10,7 +10,7 @@ export const PowerCurvePointSchema = z.object({
 
 /**
  * Schema for spindle capabilities and power characteristics
- * Defines rated power, RPM range, and power curve
+ * Defines rated power, RPM range, power curve, and thermal characteristics
  */
 export const SpindleSchema = z.object({
   id: z.string().min(1, 'Spindle ID is required'),
@@ -18,7 +18,8 @@ export const SpindleSchema = z.object({
   rpm_min: z.number().positive('Minimum RPM must be positive'),
   rpm_max: z.number().positive('Maximum RPM must be positive'),
   base_rpm: z.number().positive('Base RPM must be positive'),
-  power_curve: z.array(PowerCurvePointSchema).min(1, 'Power curve must have at least one point')
+  power_curve: z.array(PowerCurvePointSchema).min(1, 'Power curve must have at least one point'),
+  type: z.enum(['router', 'vfd_spindle']).default('vfd_spindle')
 }).refine((data) => data.rpm_min <= data.rpm_max, {
   message: 'Minimum RPM must be <= maximum RPM',
   path: ['rpm_min']

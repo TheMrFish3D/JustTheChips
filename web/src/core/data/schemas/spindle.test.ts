@@ -56,19 +56,19 @@ describe('Spindle Schema', () => {
   describe('Valid data', () => {
     it('should accept valid spindle data', () => {
       const result = SpindleSchema.parse(validSpindle)
-      expect(result).toEqual(validSpindle)
+      expect(result).toEqual({ ...validSpindle, type: 'vfd_spindle' })
     })
 
     it('should validate with validateSpindle function', () => {
       const result = validateSpindle(validSpindle)
-      expect(result).toEqual(validSpindle)
+      expect(result).toEqual({ ...validSpindle, type: 'vfd_spindle' })
     })
 
     it('should safely parse valid data', () => {
       const result = safeParseSpindle(validSpindle)
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data).toEqual(validSpindle)
+        expect(result.data).toEqual({ ...validSpindle, type: 'vfd_spindle' })
       }
     })
 
@@ -91,6 +91,23 @@ describe('Spindle Schema', () => {
       }
       const result = safeParseSpindle(spindle)
       expect(result.success).toBe(true)
+    })
+
+    it('should default to vfd_spindle type when not specified', () => {
+      const result = SpindleSchema.parse(validSpindle)
+      expect(result.type).toBe('vfd_spindle')
+    })
+
+    it('should accept explicit router type', () => {
+      const routerSpindle = { ...validSpindle, type: 'router' as const }
+      const result = SpindleSchema.parse(routerSpindle)
+      expect(result.type).toBe('router')
+    })
+
+    it('should accept explicit vfd_spindle type', () => {
+      const vfdSpindle = { ...validSpindle, type: 'vfd_spindle' as const }
+      const result = SpindleSchema.parse(vfdSpindle)
+      expect(result.type).toBe('vfd_spindle')
     })
   })
 

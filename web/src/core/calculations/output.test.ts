@@ -49,6 +49,8 @@ const mockOutputAssemblyInput: OutputAssemblyInput = {
     spindleLossesW: 127.535,
     totalPowerRequiredW: 977.769,
     powerAvailableW: 2200.0,
+    powerAvailableDeratedW: 2200.0,
+    temperatureDeratingFactor: 1.0,
     powerLimited: false,
     warnings: []
   },
