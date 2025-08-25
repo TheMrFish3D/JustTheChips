@@ -43,16 +43,9 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Find community rigidity testing data
 - Develop size-dependent rigidity factors
 
-### 5. Entry VMC and Benchtop Mill Rigidity Research
-**Priority:** Medium
-**Estimated Effort:** 2-3 hours
-**Description:** Research rigidity characteristics of entry-level VMCs and benchtop mills
-- Study typical construction methods
-- Analyze weight and material effects on rigidity
-- Research spindle integration rigidity
-- Compare with hobby CNC machines
 
-### 6. Custom Machine Rigidity Estimation Framework
+
+### 5. Custom Machine Rigidity Estimation Framework
 **Priority:** High
 **Estimated Effort:** 4-5 hours
 **Description:** Develop framework for estimating custom machine rigidity
@@ -63,7 +56,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Educational Content Research Tasks
 
-### 7. CNC Parameter Education Research
+### 6. CNC Parameter Education Research
 **Priority:** Medium
 **Estimated Effort:** 3-4 hours
 **Description:** Research educational content for CNC parameters
@@ -72,7 +65,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Document chip load relationships with material removal and tool wear
 - Create troubleshooting guides for common issues
 
-### 8. Hobby Machine Limitations Research
+### 7. Hobby Machine Limitations Research
 **Priority:** Medium  
 **Estimated Effort:** 2-3 hours
 **Description:** Research specific limitations and considerations for hobby machines
@@ -83,7 +76,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Cutting Parameter Research Tasks
 
-### 9. Hobby Machine Optimal Parameters Research
+### 8. Hobby Machine Optimal Parameters Research
 **Priority:** Medium
 **Estimated Effort:** 3-4 hours
 **Description:** Research optimal cutting parameters for hobby machines
@@ -92,7 +85,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Analyze tool deflection limits for hobby applications
 - Document parameter ranges for different machine classes
 
-### 10. Power Curve Validation Research
+### 9. Power Curve Validation Research
 **Priority:** Low
 **Estimated Effort:** 2-3 hours
 **Description:** Validate and improve spindle power curve calculations
@@ -101,7 +94,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 26-34 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)
