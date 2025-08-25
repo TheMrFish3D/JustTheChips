@@ -103,7 +103,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 26-34 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)
