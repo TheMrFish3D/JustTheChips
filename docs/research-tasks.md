@@ -83,15 +83,6 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Cutting Parameter Research Tasks
 
-### 9. Hobby Machine Optimal Parameters Research
-**Priority:** Medium
-**Estimated Effort:** 3-4 hours
-**Description:** Research optimal cutting parameters for hobby machines
-- Study reduced aggressiveness factors for hobby machines
-- Research material-specific considerations for low-rigidity machines
-- Analyze tool deflection limits for hobby applications
-- Document parameter ranges for different machine classes
-
 ### 10. Power Curve Validation Research
 **Priority:** Low
 **Estimated Effort:** 2-3 hours
@@ -101,7 +92,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Improve power calculation accuracy
 - Add temperature derating factors
 
-## Total Estimated Research Effort: 29-37 hours
+## Total Estimated Research Effort: 25-33 hours
 
 These research tasks can be executed in parallel by different agents/issues to accelerate development. Each task should result in:
 1. Updated data files (machines.json, spindles.json)

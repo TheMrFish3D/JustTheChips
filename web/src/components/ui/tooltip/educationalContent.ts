@@ -170,6 +170,56 @@ export const educationalContent: Record<string, EducationalContent> = {
     }
   },
 
+  hobbyMachineLimitations: {
+    title: 'Hobby Machine Limitations',
+    description: 'Understanding the structural and power limitations that affect hobby CNC machine performance and parameter selection.',
+    whyItMatters: 'Hobby machines require significantly reduced cutting parameters to prevent damage and maintain accuracy due to inherent design limitations.',
+    effects: {
+      optimal: 'Ultra-light (3018): 20-40% of industrial parameters. Medium hobby: 40-60%. Heavy hobby: 60-80%. Proper scaling prevents chatter, tool breakage, and poor accuracy.'
+    },
+    troubleshooting: [
+      {
+        problem: 'Excessive vibration/chatter',
+        solution: 'Reduce aggressiveness to 30-50%, use shorter tools, decrease radial engagement to 20-30%'
+      },
+      {
+        problem: 'Poor dimensional accuracy',
+        solution: 'Limit tool deflection to <0.02mm, use carbide tools, minimize stickout length'
+      },
+      {
+        problem: 'Tool breakage on hobby machines',
+        solution: 'Reduce axial engagement by 50%, use climb milling only on rigid machines, check spindle runout'
+      },
+      {
+        problem: 'Slow material removal',
+        solution: 'Use adaptive clearing paths, optimize tool diameter for material, increase spindle speed if power allows'
+      }
+    ]
+  },
+
+  toolDeflectionLimits: {
+    title: 'Tool Deflection Management',
+    description: 'Critical deflection limits for maintaining accuracy and preventing tool failure, especially important for hobby machines.',
+    whyItMatters: 'Excessive tool deflection causes poor surface finish, dimensional errors, and premature tool wear. Hobby machines are particularly susceptible due to reduced rigidity.',
+    effects: {
+      optimal: 'Precision work: <0.01mm deflection. General machining: <0.02mm. Roughing: <0.05mm. Hobby machines often limited to roughing tolerances.'
+    },
+    troubleshooting: [
+      {
+        problem: 'Calculated deflection >0.05mm',
+        solution: 'Reduce cutting forces by 50%, use larger diameter tool, minimize stickout to 3x diameter'
+      },
+      {
+        problem: 'Tapered walls or poor surface finish',
+        solution: 'Tool deflection likely cause - reduce radial engagement, increase tool stiffness'
+      },
+      {
+        problem: 'Tool chattering at depth',
+        solution: 'Dynamic amplification issue - change RPM to avoid resonance, use shorter/stiffer tool'
+      }
+    ]
+  },
+
   materialRemovalRate: {
     title: 'Material Removal Rate (MRR)',
     description: 'Volume of material removed per unit time, indicating machining efficiency.',
@@ -181,19 +231,23 @@ export const educationalContent: Record<string, EducationalContent> = {
 
   machineRigidity: {
     title: 'Machine Rigidity',
-    description: 'The machine\'s resistance to deflection under cutting forces. Varies significantly between machine types.',
-    whyItMatters: 'Determines achievable accuracy, surface finish quality, and maximum safe cutting parameters.',
+    description: 'The machine\'s resistance to deflection under cutting forces. Rigidity factors range from 0.15 (3018) to 0.8+ (VMC).',
+    whyItMatters: 'Determines achievable accuracy, surface finish quality, and maximum safe cutting parameters. Lower rigidity requires exponentially reduced cutting forces.',
     effects: {
-      optimal: '3018 CNC: Light cuts only. PrintNC: Moderate cuts possible. Entry VMC: Heavy cuts achievable.'
+      optimal: 'Ultra-light (3018): 0.1-0.2 rigidity, aluminum only. Medium hobby: 0.2-0.4, light steel possible. Heavy hobby (PrintNC): 0.5-0.7, moderate steel cuts. Entry VMC: 0.7-0.9, near-industrial capability.'
     },
     troubleshooting: [
       {
-        problem: 'Chatter or vibration',
-        solution: 'Reduce cutting forces, improve workholding, use shorter tools'
+        problem: 'Chatter or vibration on hobby machines',
+        solution: 'Reduce aggressiveness to 30-50%, use trochoidal milling, check spindle mount tightness'
       },
       {
-        problem: 'Poor accuracy',
-        solution: 'Reduce forces, check machine calibration, improve rigidity where possible'
+        problem: 'Poor dimensional accuracy',
+        solution: 'Limit cutting forces based on rigidity factor, use shorter tools, take spring passes'
+      },
+      {
+        problem: 'Machine deflection visible during cutting',
+        solution: 'Immediately reduce all parameters by 50%, check machine assembly, consider workholding improvements'
       }
     ]
   }
