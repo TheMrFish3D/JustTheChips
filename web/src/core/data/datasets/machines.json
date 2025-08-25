@@ -30,13 +30,33 @@
     }
   },
   {
-    "id": "printnc",
-    "axis_max_feed_mm_min": 6000,
-    "rigidity_factor": 0.6,
+    "id": "printnc_compact",
+    "axis_max_feed_mm_min": 8000,
+    "rigidity_factor": 0.75,
     "aggressiveness": {
-      "axial": 0.7,
+      "axial": 0.8,
+      "radial": 0.85,
+      "feed": 0.85
+    }
+  },
+  {
+    "id": "printnc_standard",
+    "axis_max_feed_mm_min": 7000,
+    "rigidity_factor": 0.65,
+    "aggressiveness": {
+      "axial": 0.75,
       "radial": 0.8,
       "feed": 0.8
+    }
+  },
+  {
+    "id": "printnc_large",
+    "axis_max_feed_mm_min": 6000,
+    "rigidity_factor": 0.55,
+    "aggressiveness": {
+      "axial": 0.7,
+      "radial": 0.75,
+      "feed": 0.75
     }
   },
   {
@@ -77,6 +97,36 @@
       "axial": 0.6,
       "radial": 0.6,
       "feed": 0.7
+    }
+  },
+  {
+    "id": "haas_vf2",
+    "axis_max_feed_mm_min": 15000,
+    "rigidity_factor": 1.0,
+    "aggressiveness": {
+      "axial": 1.0,
+      "radial": 1.0,
+      "feed": 1.0
+    }
+  },
+  {
+    "id": "tormach_1100mx",
+    "axis_max_feed_mm_min": 8000,
+    "rigidity_factor": 0.8,
+    "aggressiveness": {
+      "axial": 0.9,
+      "radial": 0.9,
+      "feed": 0.9
+    }
+  },
+  {
+    "id": "makino_v33i",
+    "axis_max_feed_mm_min": 20000,
+    "rigidity_factor": 1.2,
+    "aggressiveness": {
+      "axial": 1.1,
+      "radial": 1.1,
+      "feed": 1.1
     }
   }
 ]

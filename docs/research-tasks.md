@@ -36,12 +36,15 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 ### 4. PrintNC CNC Rigidity Analysis
 **Priority:** High
 **Estimated Effort:** 3-4 hours
+**Status:** COMPLETED ✓
 **Description:** Research and model the structural rigidity of PrintNC machines
-- Analyze steel welded frame construction
-- Study linear rail and ballscrew system
-- Research different PrintNC size variants
-- Find community rigidity testing data
-- Develop size-dependent rigidity factors
+- ✓ Analyze steel welded frame construction
+- ✓ Study linear rail and ballscrew system
+- ✓ Research different PrintNC size variants
+- ✓ Find community rigidity testing data
+- ✓ Develop size-dependent rigidity factors
+
+**Results:** Added three PrintNC size variants (compact, standard, large) with rigidity factors of 0.75, 0.65, and 0.55 respectively, based on structural analysis and community data. See `/docs/research/printnc-rigidity-analysis.md` for detailed analysis.
 
 ### 5. Entry VMC and Benchtop Mill Rigidity Research
 **Priority:** Medium

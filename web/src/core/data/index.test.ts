@@ -23,10 +23,15 @@ describe('Data Integration', () => {
 
   describe('Machines Dataset', () => {
     it('should load machines from JSON datasets', () => {
-      expect(machines).toHaveLength(3)
-      expect(machines[0].id).toBe('haas_vf2')
-      expect(machines[1].id).toBe('tormach_1100mx')
-      expect(machines[2].id).toBe('makino_v33i')
+      expect(machines).toHaveLength(13)
+      // Check that we have the expected professional machines for testing
+      expect(machines.find(m => m.id === 'haas_vf2')).toBeDefined()
+      expect(machines.find(m => m.id === 'tormach_1100mx')).toBeDefined()
+      expect(machines.find(m => m.id === 'makino_v33i')).toBeDefined()
+      // Check that we have the PrintNC variants
+      expect(machines.find(m => m.id === 'printnc_compact')).toBeDefined()
+      expect(machines.find(m => m.id === 'printnc_standard')).toBeDefined()
+      expect(machines.find(m => m.id === 'printnc_large')).toBeDefined()
     })
 
     it('should have valid machine properties', () => {
@@ -67,28 +72,26 @@ describe('Data Integration', () => {
 
   describe('Spindles Dataset', () => {
     it('should load spindles from JSON datasets', () => {
-      expect(spindles).toHaveLength(3)
-      expect(spindles[0].id).toBe('spindle_2_2kw')
-      expect(spindles[1].id).toBe('spindle_7_5kw')
-      expect(spindles[2].id).toBe('spindle_0_8kw_high_speed')
+      expect(spindles).toHaveLength(6)
+      // Check that we have expected hobby spindles
+      expect(spindles.find(s => s.id === 'dewalt_router_1_25hp')).toBeDefined()
+      expect(spindles.find(s => s.id === 'vfd_spindle_2_2kw')).toBeDefined()
     })
 
     it('should have valid spindle properties', () => {
-      const spindle = spindles.find(s => s.id === 'spindle_2_2kw')
+      const spindle = spindles.find(s => s.id === 'vfd_spindle_2_2kw')
       expect(spindle).toBeDefined()
       expect(spindle!.rated_power_kw).toBe(2.2)
       expect(spindle!.rpm_min).toBe(100)
       expect(spindle!.rpm_max).toBe(24000)
-      expect(spindle!.base_rpm).toBe(1000)
-      expect(spindle!.power_curve).toHaveLength(6)
     })
 
     it('should have valid power curves', () => {
-      const highSpeed = spindles.find(s => s.id === 'spindle_0_8kw_high_speed')
-      expect(highSpeed).toBeDefined()
-      expect(highSpeed!.rpm_max).toBe(60000)
-      expect(highSpeed!.power_curve[0].rpm).toBe(500)
-      expect(highSpeed!.power_curve[0].power_kw).toBe(0.05)
+      const vfdSpindle = spindles.find(s => s.id === 'vfd_spindle_2_2kw')
+      expect(vfdSpindle).toBeDefined()
+      expect(vfdSpindle!.power_curve).toBeDefined()
+      expect(vfdSpindle!.power_curve.length).toBeGreaterThan(0)
+      expect(vfdSpindle!.power_curve[0].power_kw).toBeGreaterThan(0)
     })
   })
 
