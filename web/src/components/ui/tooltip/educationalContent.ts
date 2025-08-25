@@ -181,10 +181,10 @@ export const educationalContent: Record<string, EducationalContent> = {
 
   machineRigidity: {
     title: 'Machine Rigidity',
-    description: 'The machine\'s resistance to deflection under cutting forces. Varies significantly between machine types.',
-    whyItMatters: 'Determines achievable accuracy, surface finish quality, and maximum safe cutting parameters.',
+    description: 'The machine\'s resistance to deflection under cutting forces. Primarily determined by mass, construction material, and spindle integration method.',
+    whyItMatters: 'Determines achievable accuracy, surface finish quality, and maximum safe cutting parameters. Higher rigidity allows more aggressive cutting.',
     effects: {
-      optimal: '3018 CNC: Light cuts only. PrintNC: Moderate cuts possible. Entry VMC: Heavy cuts achievable.'
+      optimal: 'Entry VMC (0.8): Heavy cuts in steel. Benchtop Mill (0.45): Moderate cuts, good precision. PrintNC (0.6): Good aluminum capability. 3018 CNC (0.15): Light cuts only.'
     },
     troubleshooting: [
       {
@@ -194,6 +194,10 @@ export const educationalContent: Record<string, EducationalContent> = {
       {
         problem: 'Poor accuracy',
         solution: 'Reduce forces, check machine calibration, improve rigidity where possible'
+      },
+      {
+        problem: 'Limited material removal rate',
+        solution: 'Consider machine upgrade: cast iron > steel > aluminum construction, higher mass improves rigidity'
       }
     ]
   }
