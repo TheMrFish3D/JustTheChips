@@ -42,11 +42,111 @@ A comprehensive CNC machining calculator that provides accurate spindle speeds, 
 
 ### Building for Production
 
+#### Quick Deployment (Recommended)
+
+Use the provided deployment scripts for your platform:
+
+**Linux/macOS:**
+```bash
+./deploy.sh
+```
+
+**Windows (Command Prompt):**
+```cmd
+deploy.bat
+```
+
+**Windows (PowerShell):**
+```powershell
+.\deploy.ps1
+```
+
+The deployment scripts will:
+- Check Node.js and npm installation
+- Install all dependencies
+- Run code linting
+- Build the application for production
+- Provide deployment instructions
+
+#### Manual Build
+
 ```bash
 cd web
 npm run build
 npm run preview  # Preview the built application
 ```
+
+## Deployment
+
+JustTheChips includes cross-platform deployment scripts to simplify building and deploying the application.
+
+### Deployment Scripts
+
+| Platform | Script | Description |
+|----------|--------|-------------|
+| Linux/macOS | `./deploy.sh` | Bash script for Unix-like systems |
+| Windows | `deploy.bat` | Batch script for Windows Command Prompt |
+| Windows | `.\deploy.ps1` | PowerShell script with enhanced features |
+
+### Prerequisites
+
+- **Node.js 18+** and npm
+- Git (for cloning the repository)
+
+### Deployment Process
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/TheMrFish3D/JustTheChips.git
+   cd JustTheChips
+   ```
+
+2. **Run the deployment script for your platform**:
+   
+   **Linux/macOS:**
+   ```bash
+   ./deploy.sh
+   ```
+   
+   **Windows (Command Prompt):**
+   ```cmd
+   deploy.bat
+   ```
+   
+   **Windows (PowerShell with optional preview):**
+   ```powershell
+   # Basic deployment
+   .\deploy.ps1
+   
+   # Skip preview prompt
+   .\deploy.ps1 -SkipPreview
+   
+   # Show help
+   .\deploy.ps1 -Help
+   ```
+
+3. **Deploy the built files**:
+   After successful build, upload the contents of `web/dist/` to your web server.
+
+### What the Scripts Do
+
+- ✅ Verify Node.js 18+ and npm installation
+- 📦 Install root and web dependencies  
+- 🔍 Run ESLint code quality checks
+- 🔨 Build the application for production
+- 📊 Display build summary and file counts
+- 🌐 Provide preview and deployment instructions
+
+### Manual Preview
+
+After building, you can preview the application locally:
+
+```bash
+cd web
+npm run preview
+```
+
+The preview server will start on `http://localhost:4173`.
 
 ## Usage
 
