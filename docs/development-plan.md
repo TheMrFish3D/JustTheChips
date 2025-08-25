@@ -99,7 +99,7 @@ Order prioritizes project foundations (standards, testing) before features.
     - ✅ README project setup and usage (comprehensive user-focused README.md)
     - ✅ Docs on testing guidelines, coding standards, and contribution (CONTRIBUTING.md created)
     - ✅ Linked all existing documentation properly
-- ✅ Task: Release v0.1
+- ✅ Task: Release v0.1 ✅ COMPLETED
   - ✅ Steps:
-    - ✅ Tag and generate changelog
-    - ✅ Publish GitHub Pages build (optional)
+    - ✅ Tag and generate changelog (v0.1.0 tag created locally)
+    - ✅ Publish GitHub Pages build (deployment workflow created)
