@@ -55,6 +55,9 @@
     "stickout_mm": 35.0,
     "material": "carbide",
     "default_doc_mm": 2.0,
-    "default_woc_mm": 50.0
+    "default_woc_mm": 50.0,
+    "metadata": {
+      "body_diameter_mm": 63.0
+    }
   }
 ]

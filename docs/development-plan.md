@@ -89,10 +89,11 @@ Order prioritizes project foundations (standards, testing) before features.
     - ✅ Tests for optimization logic
 
 ## 5. QA, Docs, and Release
-- Task: End-to-end test scenarios
-  - Steps:
-    - Happy path scenarios for common materials and tools
-    - Edge cases (small tool, power limit, chip thinning)
+- ✅ Task: End-to-end test scenarios
+  - ✅ Steps:
+    - ✅ Happy path scenarios for common materials and tools
+    - ✅ Edge cases (small tool, power limit, chip thinning)
+    - ✅ Snapshot warnings validation
 - Task: Documentation
   - Steps:
     - README project setup and usage
