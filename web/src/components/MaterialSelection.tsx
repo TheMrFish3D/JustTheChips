@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 
 export default function MaterialSelection() {
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(['aluminum-6061'])
+  const { state, setSelectedMaterials } = useAppContext()
+  const { selectedMaterials } = state
 
   const materials = [
     { id: 'hardwood', name: 'Hardwood', category: 'Wood' },
@@ -22,11 +23,10 @@ export default function MaterialSelection() {
   ]
 
   const toggleMaterial = (materialId: string) => {
-    setSelectedMaterials(prev => 
-      prev.includes(materialId) 
-        ? prev.filter(id => id !== materialId)
-        : [...prev, materialId]
-    )
+    const newMaterials = selectedMaterials.includes(materialId) 
+      ? selectedMaterials.filter(id => id !== materialId)
+      : [...selectedMaterials, materialId]
+    setSelectedMaterials(newMaterials)
   }
 
   const groupedMaterials = materials.reduce((acc, material) => {

@@ -1,46 +1,25 @@
-import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 
-interface MachineConfigProps {
-  units: 'metric' | 'imperial'
-}
-
-export default function MachineConfig({ units }: MachineConfigProps) {
-  const [config, setConfig] = useState({
-    spindle: {
-      power: 2.2,
-      frequency: 400,
-      maxRpm: 24000
-    },
-    motors: {
-      xTorque: 1.26,
-      xCount: 1,
-      yTorque: 1.26,
-      yCount: 1,
-      zTorque: 1.26,
-      zCount: 1
-    },
-    coolant: 'mist' as 'vacuum' | 'mist' | 'flood' | 'airblast'
-  })
+export default function MachineConfig() {
+  const { state, updateMachineConfig } = useAppContext()
+  const { machineConfig, units } = state
 
   const updateSpindle = (field: string, value: number) => {
-    setConfig(prev => ({
-      ...prev,
-      spindle: { ...prev.spindle, [field]: value }
-    }))
+    updateMachineConfig({
+      spindle: { ...machineConfig.spindle, [field]: value }
+    })
   }
 
   const updateMotors = (field: string, value: number) => {
-    setConfig(prev => ({
-      ...prev,
-      motors: { ...prev.motors, [field]: value }
-    }))
+    updateMachineConfig({
+      motors: { ...machineConfig.motors, [field]: value }
+    })
   }
 
   const updateCoolant = (value: string) => {
-    setConfig(prev => ({
-      ...prev,
-      coolant: value as typeof config.coolant
-    }))
+    updateMachineConfig({
+      coolant: value as typeof machineConfig.coolant
+    })
   }
 
   return (
@@ -53,7 +32,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
         <input
           type="number"
           step="0.1"
-          value={config.spindle.power}
+          value={machineConfig.spindle.power}
           onChange={(e) => updateSpindle('power', parseFloat(e.target.value) || 0)}
         />
       </div>
@@ -63,7 +42,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <label>Frequency (Hz)</label>
           <input
             type="number"
-            value={config.spindle.frequency}
+            value={machineConfig.spindle.frequency}
             onChange={(e) => updateSpindle('frequency', parseInt(e.target.value) || 0)}
           />
         </div>
@@ -71,7 +50,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <label>Max RPM</label>
           <input
             type="number"
-            value={config.spindle.maxRpm}
+            value={machineConfig.spindle.maxRpm}
             onChange={(e) => updateSpindle('maxRpm', parseInt(e.target.value) || 0)}
           />
         </div>
@@ -84,7 +63,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             step="0.01"
-            value={config.motors.xTorque}
+            value={machineConfig.motors.xTorque}
             onChange={(e) => updateMotors('xTorque', parseFloat(e.target.value) || 0)}
           />
         </div>
@@ -93,7 +72,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             min="1"
-            value={config.motors.xCount}
+            value={machineConfig.motors.xCount}
             onChange={(e) => updateMotors('xCount', parseInt(e.target.value) || 1)}
           />
         </div>
@@ -105,7 +84,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             step="0.01"
-            value={config.motors.yTorque}
+            value={machineConfig.motors.yTorque}
             onChange={(e) => updateMotors('yTorque', parseFloat(e.target.value) || 0)}
           />
         </div>
@@ -114,7 +93,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             min="1"
-            value={config.motors.yCount}
+            value={machineConfig.motors.yCount}
             onChange={(e) => updateMotors('yCount', parseInt(e.target.value) || 1)}
           />
         </div>
@@ -126,7 +105,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             step="0.01"
-            value={config.motors.zTorque}
+            value={machineConfig.motors.zTorque}
             onChange={(e) => updateMotors('zTorque', parseFloat(e.target.value) || 0)}
           />
         </div>
@@ -135,7 +114,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
           <input
             type="number"
             min="1"
-            value={config.motors.zCount}
+            value={machineConfig.motors.zCount}
             onChange={(e) => updateMotors('zCount', parseInt(e.target.value) || 1)}
           />
         </div>
@@ -145,7 +124,7 @@ export default function MachineConfig({ units }: MachineConfigProps) {
       <div className="form-group">
         <label>Coolant Type</label>
         <select
-          value={config.coolant}
+          value={machineConfig.coolant}
           onChange={(e) => updateCoolant(e.target.value)}
         >
           <option value="vacuum">Vacuum</option>

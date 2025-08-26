@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import './App.css'
+import { AppProvider, useAppContext } from './context/AppContext'
 import MachineConfig from './components/MachineConfig'
 import ToolConfig from './components/ToolConfig'
 import MaterialSelection from './components/MaterialSelection'
 import OperationSelection from './components/OperationSelection'
 import ParametersTable from './components/ParametersTable'
 
-function App() {
-  const [units, setUnits] = useState<'metric' | 'imperial'>('metric')
+function AppContent() {
+  const { state, setUnits } = useAppContext()
 
   return (
     <div className="app">
@@ -20,7 +20,7 @@ function App() {
               type="radio"
               name="units"
               value="metric"
-              checked={units === 'metric'}
+              checked={state.units === 'metric'}
               onChange={(e) => setUnits(e.target.value as 'metric' | 'imperial')}
             />
             Metric
@@ -30,7 +30,7 @@ function App() {
               type="radio"
               name="units"
               value="imperial"
-              checked={units === 'imperial'}
+              checked={state.units === 'imperial'}
               onChange={(e) => setUnits(e.target.value as 'metric' | 'imperial')}
             />
             Imperial
@@ -40,17 +40,25 @@ function App() {
 
       <main className="app-main">
         <div className="config-section">
-          <MachineConfig units={units} />
-          <ToolConfig units={units} />
+          <MachineConfig />
+          <ToolConfig />
           <MaterialSelection />
           <OperationSelection />
         </div>
         
         <div className="results-section">
-          <ParametersTable units={units} />
+          <ParametersTable />
         </div>
       </main>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   )
 }
 

@@ -1,8 +1,15 @@
-import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
+import type { OperationConfig } from '../data/calculations'
 
 export default function OperationSelection() {
-  const [selectedOperations, setSelectedOperations] = useState<string[]>(['slotting'])
-  const [targetFinish, setTargetFinish] = useState<'roughing' | 'finishing'>('roughing')
+  const { state, setSelectedOperations } = useAppContext()
+  const { selectedOperations } = state
+  
+  // Extract current finish setting from first operation, or default to roughing
+  const currentFinish = selectedOperations.length > 0 ? selectedOperations[0].finish : 'roughing'
+  
+  // Extract current operation types
+  const selectedOperationTypes = selectedOperations.map(op => op.type)
 
   const operations = [
     { id: 'slotting', name: 'Slotting', description: 'Full width cuts' },
@@ -15,11 +22,33 @@ export default function OperationSelection() {
   ]
 
   const toggleOperation = (operationId: string) => {
-    setSelectedOperations(prev => 
-      prev.includes(operationId) 
-        ? prev.filter(id => id !== operationId)
-        : [...prev, operationId]
-    )
+    const isValidOperationType = (id: string): id is OperationConfig['type'] => {
+      return ['slotting', 'facing', 'contour', 'adaptive', 'pocketing', 'drilling', 'threading'].includes(id)
+    }
+    
+    if (!isValidOperationType(operationId)) return
+    
+    const newOperationTypes = selectedOperationTypes.includes(operationId) 
+      ? selectedOperationTypes.filter(id => id !== operationId)
+      : [...selectedOperationTypes, operationId]
+    
+    // Update the operations list with the new types, maintaining current finish
+    const newOperations = newOperationTypes.map(type => ({
+      type: type as OperationConfig['type'],
+      finish: currentFinish
+    }))
+    
+    setSelectedOperations(newOperations)
+  }
+
+  const setTargetFinish = (finish: 'roughing' | 'finishing') => {
+    // Update all operations with the new finish
+    const newOperations = selectedOperationTypes.map(type => ({
+      type: type as OperationConfig['type'],
+      finish
+    }))
+    
+    setSelectedOperations(newOperations)
   }
 
   return (
@@ -35,7 +64,7 @@ export default function OperationSelection() {
             <input
               type="checkbox"
               id={operation.id}
-              checked={selectedOperations.includes(operation.id)}
+              checked={selectedOperationTypes.includes(operation.id as OperationConfig['type'])}
               onChange={() => toggleOperation(operation.id)}
             />
             <label htmlFor={operation.id} title={operation.description}>
@@ -52,7 +81,7 @@ export default function OperationSelection() {
             type="radio"
             name="targetFinish"
             value="roughing"
-            checked={targetFinish === 'roughing'}
+            checked={currentFinish === 'roughing'}
             onChange={(e) => setTargetFinish(e.target.value as 'roughing' | 'finishing')}
           />
           Roughing
@@ -62,14 +91,14 @@ export default function OperationSelection() {
             type="radio"
             name="targetFinish"
             value="finishing"
-            checked={targetFinish === 'finishing'}
+            checked={currentFinish === 'finishing'}
             onChange={(e) => setTargetFinish(e.target.value as 'roughing' | 'finishing')}
           />
           Finishing
         </label>
       </div>
 
-      {selectedOperations.length === 0 && (
+      {selectedOperationTypes.length === 0 && (
         <div className="warning">
           Please select at least one operation to generate cutting parameters.
         </div>

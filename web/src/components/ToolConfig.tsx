@@ -1,21 +1,11 @@
-import { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
 
-interface ToolConfigProps {
-  units: 'metric' | 'imperial'
-}
-
-export default function ToolConfig({ units }: ToolConfigProps) {
-  const [tool, setTool] = useState({
-    type: 'flat-endmill' as 'flat-endmill' | 'ball-endmill' | 'insert-endmill' | 'drill' | 'threadmill' | 'vbit' | 'chamfer',
-    diameter: 6,
-    flutes: 2,
-    stickout: 15,
-    material: 'carbide' as 'hss' | 'carbide' | 'ceramic' | 'diamond',
-    coating: 'tin' as 'none' | 'tin' | 'ticn' | 'tialn' | 'dlc' | 'diamond'
-  })
+export default function ToolConfig() {
+  const { state, updateToolConfig } = useAppContext()
+  const { toolConfig, units } = state
 
   const updateTool = (field: string, value: string | number) => {
-    setTool(prev => ({ ...prev, [field]: value }))
+    updateToolConfig({ [field]: value })
   }
 
   return (
@@ -25,7 +15,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
       <div className="form-group">
         <label>Tool Type</label>
         <select
-          value={tool.type}
+          value={toolConfig.type}
           onChange={(e) => updateTool('type', e.target.value)}
         >
           <option value="flat-endmill">Flat End Mill</option>
@@ -44,7 +34,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
           <input
             type="number"
             step={units === 'metric' ? '0.1' : '0.01'}
-            value={tool.diameter}
+            value={toolConfig.diameter}
             onChange={(e) => updateTool('diameter', parseFloat(e.target.value) || 0)}
           />
         </div>
@@ -53,7 +43,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
           <input
             type="number"
             min="1"
-            value={tool.flutes}
+            value={toolConfig.flutes}
             onChange={(e) => updateTool('flutes', parseInt(e.target.value) || 1)}
           />
         </div>
@@ -64,7 +54,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
         <input
           type="number"
           step={units === 'metric' ? '0.1' : '0.01'}
-          value={tool.stickout}
+          value={toolConfig.stickout}
           onChange={(e) => updateTool('stickout', parseFloat(e.target.value) || 0)}
         />
       </div>
@@ -73,7 +63,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
         <div className="form-group">
           <label>Tool Material</label>
           <select
-            value={tool.material}
+            value={toolConfig.material}
             onChange={(e) => updateTool('material', e.target.value)}
           >
             <option value="hss">HSS (High Speed Steel)</option>
@@ -85,7 +75,7 @@ export default function ToolConfig({ units }: ToolConfigProps) {
         <div className="form-group">
           <label>Tool Coating</label>
           <select
-            value={tool.coating}
+            value={toolConfig.coating}
             onChange={(e) => updateTool('coating', e.target.value)}
           >
             <option value="none">None</option>
