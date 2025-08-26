@@ -49,7 +49,7 @@ export function InputsSection() {
       padding: '16px', 
       marginBottom: '16px' 
     }}>
-      <h3>Inputs</h3>
+      <h3 style={{ color: '#333', margin: '0 0 16px 0' }}>Inputs</h3>
       
       <div style={{ 
         display: 'grid', 
@@ -107,14 +107,14 @@ export function InputsSection() {
         
         {/* Cut Type Selection */}
         <div>
-          <label htmlFor="cutType" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+          <label htmlFor="cutType" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#333' }}>
             Cut Type:
           </label>
           <select
             id="cutType"
             value={store.cutType || ''}
             onChange={(e) => store.setInput('cutType', e.target.value as CutType)}
-            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: 'white', color: '#333' }}
           >
             <option value="">Select cut type</option>
             {cutTypes.map((type) => (
