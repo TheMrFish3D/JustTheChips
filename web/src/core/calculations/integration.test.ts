@@ -411,7 +411,7 @@ describe('Integration: Complete Calculation Pipeline', () => {
     // Force should be reasonable for aluminum with moderate cuts
     expect(forceResult.totalForceN).toBeGreaterThan(50)
     expect(forceResult.totalForceN).toBeLessThan(2000) // Not excessively high
-    expect(forceResult.toolForceMultiplier).toBe(1.0) // Endmill multiplier
+    expect(forceResult.toolTypeMultiplier).toBe(1.0) // Endmill multiplier
 
     // Calculate deflection
     const deflectionResult = calculateDeflection(

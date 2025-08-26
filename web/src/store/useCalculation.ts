@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { safeParseInputs } from '../core/data/schemas/inputs.js'
-import { calculate, calculateWithToolConfig } from '../core/index.js'
+import { calculateWithToolConfig } from '../core/index.js'
 import { validateToolConfiguration } from '../core/utils/toolConfiguration.js'
 
 import { useCalculatorStore } from './index.js'
