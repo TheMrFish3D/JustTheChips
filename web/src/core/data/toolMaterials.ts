@@ -54,7 +54,7 @@ interface CoatingProperties {
 /**
  * Tool material database - Industry standard values
  */
-export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
+export const toolMaterials: Record<string, ToolMaterialProperties> = {
   // High Speed Steel variants
   'HSS': {
     youngsModulusGPa: 210,
@@ -69,7 +69,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 1.4             // HSS is tough
   },
   
-  'M1_HSS': {
+  'M1Hss': {
     youngsModulusGPa: 205,
     densityGPerCm3: 8.1,
     hardnessHRC: 63,
@@ -82,7 +82,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 1.3
   },
   
-  'M2_HSS': {
+  'M2Hss': {
     youngsModulusGPa: 210,
     densityGPerCm3: 8.2,
     hardnessHRC: 64,
@@ -95,7 +95,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 1.25
   },
   
-  'M42_HSS': {  // Cobalt HSS - premium grade
+  'M42Hss': {  // Cobalt HSS - premium grade
     youngsModulusGPa: 220,
     densityGPerCm3: 8.4,
     hardnessHRC: 67,
@@ -122,7 +122,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 0.7             // Carbide is brittle
   },
   
-  'C1_carbide': {  // Straight WC-Co, maximum wear resistance
+  'c1Carbide': {  // Straight WC-Co, maximum wear resistance
     youngsModulusGPa: 620,
     densityGPerCm3: 15.0,
     hardnessHRC: 94,
@@ -135,7 +135,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 0.6
   },
   
-  'C2_carbide': {  // General purpose carbide
+  'c2Carbide': {  // General purpose carbide
     youngsModulusGPa: 600,
     densityGPerCm3: 14.5,
     hardnessHRC: 92,
@@ -148,7 +148,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
     toughnessRating: 0.7
   },
   
-  'C3_carbide': {  // Tougher carbide for roughing
+  'c3Carbide': {  // Tougher carbide for roughing
     youngsModulusGPa: 580,
     densityGPerCm3: 14.0,
     hardnessHRC: 89,
@@ -193,7 +193,7 @@ export const TOOL_MATERIALS: Record<string, ToolMaterialProperties> = {
 /**
  * Tool coating database - Industry standard values
  */
-export const TOOL_COATINGS: Record<string, CoatingProperties> = {
+export const toolCoatings: Record<string, CoatingProperties> = {
   'uncoated': {
     surfaceSpeedBoost: 1.0,          // No boost
     chiploadBoost: 1.0,
@@ -294,24 +294,24 @@ export function getToolProperties(material: string, coating: string): {
   const normalizedMaterial = material.toLowerCase().trim()
   
   // Find best match for material
-  let materialProps = TOOL_MATERIALS[normalizedMaterial]
+  let materialProps = toolMaterials[normalizedMaterial]
   if (!materialProps) {
     // Try partial matches
     if (normalizedMaterial.includes('carbide')) {
-      materialProps = TOOL_MATERIALS['carbide']
+      materialProps = toolMaterials['carbide']
     } else if (normalizedMaterial.includes('hss') || normalizedMaterial.includes('high_speed_steel')) {
-      materialProps = TOOL_MATERIALS['HSS']
+      materialProps = toolMaterials['HSS']
     } else if (normalizedMaterial.includes('steel')) {
-      materialProps = TOOL_MATERIALS['tool_steel']
+      materialProps = toolMaterials['tool_steel']
     } else {
       // Default to HSS if unknown
-      materialProps = TOOL_MATERIALS['HSS']
+      materialProps = toolMaterials['HSS']
     }
   }
   
   // Find coating properties
   const normalizedCoating = coating.toLowerCase().trim()
-  const coatingProps = TOOL_COATINGS[normalizedCoating] || TOOL_COATINGS['uncoated']
+  const coatingProps = toolCoatings[normalizedCoating] || toolCoatings['uncoated']
   
   // Calculate combined properties
   const combinedProps = {

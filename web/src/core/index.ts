@@ -1,7 +1,6 @@
 // Core calculation engine orchestrator
 // Orchestrates all calculation modules to produce final results
 
-import { materials, machines, tools, spindles } from './data/index.js'
 import {
   assembleOutput,
   calculateChiploadAndFeed,
@@ -13,9 +12,11 @@ import {
   getEffectiveDiameter,
   getEffectiveFlutes,
   validateInputs,
-  type OutputAssemblyInput
+  type OutputAssemblyInput,
+  type ValidationWarning
 } from './calculations/index.js'
 import type { CalculationOutput } from './calculations/output.js'
+import { materials, machines, tools, spindles } from './data/index.js'
 import type { Inputs } from './data/schemas/inputs.js'
 import { createToolFromConfiguration, type ToolConfiguration } from './utils/toolConfiguration.js'
 
@@ -59,7 +60,7 @@ export function calculate(inputs: Inputs): CalculationResults {
   const effectiveFlutes = getEffectiveFlutes(tool)
 
   // Validate inputs (skip for vbits as they require special handling)
-  let validationWarnings = []
+  let validationWarnings: ValidationWarning[] = []
   if (tool.type !== 'vbit') {
     const validationResult = validateInputs(
       inputs,
@@ -188,7 +189,7 @@ export function calculateWithToolConfig(
   }
 
   // Validate inputs (skip for vbits as they require special handling)
-  let validationWarnings = []
+  let validationWarnings: ValidationWarning[] = []
   if (tool.type !== 'vbit') {
     const validationResult = validateInputs(
       inputs,

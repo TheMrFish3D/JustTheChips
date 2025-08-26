@@ -63,7 +63,7 @@ describe('Force Calculations', () => {
       expect(result.baseForceMaterialN).toBeCloseTo(360, 5)
 
       // Tool multiplier for endmill_flat = 1.0
-      expect(result.toolForceMultiplier).toBe(1.0)
+      expect(result.toolTypeMultiplier).toBe(1.0)
 
       // Total force = 360 × 1.0 = 360 N
       expect(result.totalForceN).toBeCloseTo(360, 5)
@@ -78,7 +78,7 @@ describe('Force Calculations', () => {
       expect(result.baseForceMaterialN).toBeCloseTo(360, 5)
 
       // Tool multiplier for drill = 1.5
-      expect(result.toolForceMultiplier).toBe(1.5)
+      expect(result.toolTypeMultiplier).toBe(1.5)
 
       // Total force = 360 × 1.5 = 540 N
       expect(result.totalForceN).toBeCloseTo(540, 5)
@@ -168,7 +168,7 @@ describe('Force Calculations', () => {
 
         // Base force should be same for all: 1.2 × 0.2 × 1000 = 240 N
         expect(result.baseForceMaterialN).toBeCloseTo(240, 5)
-        expect(result.toolForceMultiplier).toBe(multiplier)
+        expect(result.toolTypeMultiplier).toBe(multiplier)
         expect(result.totalForceN).toBeCloseTo(240 * multiplier, 5)
       })
     })

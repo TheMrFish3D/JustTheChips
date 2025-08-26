@@ -54,7 +54,8 @@ describe('Enhanced warning display functionality', () => {
       forceResult: {
         chipAreaMm2: 3.456,
         baseForceMaterialN: 245.678,
-        toolForceMultiplier: 1.0,
+        toolTypeMultiplier: 1.0,
+        toolMaterialMultiplier: 1.0,
         totalForceN: 245.678,
         warnings: []
       },

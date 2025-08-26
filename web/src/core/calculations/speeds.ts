@@ -1,7 +1,7 @@
 import type { Material } from '../data/schemas/material.js'
 import type { Spindle } from '../data/schemas/spindle.js'
 import type { Tool } from '../data/schemas/tool.js'
-import { getToolProperties, getToolMaterialRecommendations } from '../data/toolMaterials.js'
+import { getToolMaterialRecommendations } from '../data/toolMaterials.js'
 import { clamp } from '../utils/math.js'
 
 export type CutType = 'slot' | 'profile' | 'adaptive' | 'facing' | 'drilling' | 'boring'
@@ -72,7 +72,6 @@ export function calculateSpeedAndRPM(
   let materialRecommendations: string[] = []
   
   if (tool) {
-    const toolProps = getToolProperties(tool.material, tool.coating)
     const recommendations = getToolMaterialRecommendations(tool.material, material.category)
     
     toolMaterialFactor = recommendations.recommendedSurfaceSpeedMultiplier
