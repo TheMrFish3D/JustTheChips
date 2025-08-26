@@ -7,6 +7,7 @@ export default function ParametersTable() {
   const { machineConfig, toolConfig, selectedMaterials, selectedOperations, units } = state
   const [calculations, setCalculations] = useState<CalculationResult[]>([])
   const [showCalculations, setShowCalculations] = useState(false)
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
 
   const calculate = () => {
     const results = calculateParameters(
@@ -18,6 +19,16 @@ export default function ParametersTable() {
     )
     setCalculations(results)
     setShowCalculations(true)
+  }
+
+  const toggleRow = (index: number) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedRows(newExpanded)
   }
 
   const exportData = (format: 'csv' | 'json') => {
@@ -32,7 +43,15 @@ export default function ParametersTable() {
       [`MRR (${units === 'metric' ? 'cm³/min' : 'in³/min'})`]: calc.materialRemovalRate,
       'Spindle Power (%)': calc.spindlePower,
       [`Cutting Force (${units === 'metric' ? 'N' : 'lbf'})`]: calc.cuttingForce,
-      [`Surface Speed (${units === 'metric' ? 'm/min' : 'ft/min'})`]: calc.surfaceSpeed
+      [`Surface Speed (${units === 'metric' ? 'm/min' : 'ft/min'})`]: calc.surfaceSpeed,
+      [`Chip Thickness (${units === 'metric' ? 'mm' : 'in'})`]: calc.chipThickness,
+      [`Tool Deflection (${units === 'metric' ? 'mm' : 'in'})`]: calc.toolDeflection,
+      [`Surface Finish (${units === 'metric' ? 'μm' : 'μin'})`]: calc.surfaceFinish,
+      'Tool Life (min)': calc.toolLife,
+      'Machining Time (min)': calc.machiningTime,
+      'Heat Generation (W)': calc.heatGeneration,
+      'Chatter Frequency (Hz)': calc.chatterFrequency,
+      'Cost per Part': calc.costPerPart
     }))
 
     if (format === 'csv') {
@@ -75,6 +94,7 @@ export default function ParametersTable() {
             <table className="table">
               <thead>
                 <tr>
+                  <th>Details</th>
                   <th>Material</th>
                   <th>Operation</th>
                   <th>RPM</th>
@@ -90,21 +110,70 @@ export default function ParametersTable() {
               </thead>
               <tbody>
                 {calculations.map((calc, index) => (
-                  <tr key={index} className={calc.warnings.length > 0 ? 'warning' : ''}>
-                    <td>{calc.material}</td>
-                    <td>{calc.operation}</td>
-                    <td>{calc.rpm}</td>
-                    <td>{calc.feedRate}</td>
-                    <td>{calc.feedPerTooth}</td>
-                    <td>{calc.depthOfCut}</td>
-                    <td>{calc.stepover}</td>
-                    <td>{calc.materialRemovalRate}</td>
-                    <td style={{ backgroundColor: calc.spindlePower > 80 ? '#4a3800' : 'transparent' }}>
-                      {calc.spindlePower}%
-                    </td>
-                    <td>{calc.cuttingForce}</td>
-                    <td>{calc.surfaceSpeed}</td>
-                  </tr>
+                  <>
+                    <tr key={index} className={calc.warnings.length > 0 ? 'warning' : ''}>
+                      <td>
+                        <button 
+                          className="button" 
+                          onClick={() => toggleRow(index)}
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                        >
+                          {expandedRows.has(index) ? '−' : '+'}
+                        </button>
+                      </td>
+                      <td>{calc.material}</td>
+                      <td>{calc.operation}</td>
+                      <td>{calc.rpm}</td>
+                      <td>{calc.feedRate}</td>
+                      <td>{calc.feedPerTooth}</td>
+                      <td>{calc.depthOfCut}</td>
+                      <td>{calc.stepover}</td>
+                      <td>{calc.materialRemovalRate}</td>
+                      <td style={{ backgroundColor: calc.spindlePower > 80 ? '#4a3800' : 'transparent' }}>
+                        {calc.spindlePower}%
+                      </td>
+                      <td>{calc.cuttingForce}</td>
+                      <td>{calc.surfaceSpeed}</td>
+                    </tr>
+                    {expandedRows.has(index) && (
+                      <tr key={`${index}-expanded`} className="expanded-row">
+                        <td colSpan={12}>
+                          <div style={{ padding: '15px', backgroundColor: '#1a1a1a', border: '1px solid #333' }}>
+                            <h4>📊 Advanced Analysis</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+                              <div>
+                                <strong>🔧 Tool Analysis</strong>
+                                <div>Chip Thickness: {calc.chipThickness} {units === 'metric' ? 'mm' : 'in'}</div>
+                                <div>Tool Deflection: {calc.toolDeflection} {units === 'metric' ? 'mm' : 'in'}</div>
+                                <div>Tool Life: {calc.toolLife} minutes</div>
+                              </div>
+                              <div>
+                                <strong>🎯 Quality & Performance</strong>
+                                <div>Surface Finish: {calc.surfaceFinish} {units === 'metric' ? 'μm' : 'μin'} Ra</div>
+                                <div>Machining Time: {calc.machiningTime} minutes</div>
+                                <div>Cost per Part: ${calc.costPerPart}</div>
+                              </div>
+                              <div>
+                                <strong>🌡️ Thermal & Vibration</strong>
+                                <div>Heat Generation: {calc.heatGeneration} W</div>
+                                <div>Chatter Frequency: {calc.chatterFrequency} Hz</div>
+                              </div>
+                            </div>
+                            {calc.optimization.length > 0 && (
+                              <div>
+                                <strong>💡 Optimization Recommendations:</strong>
+                                <ul style={{ margin: '5px 0', paddingLeft: '20px' }}>
+                                  {calc.optimization.map((rec, rIndex) => (
+                                    <li key={rIndex} style={{ marginBottom: '3px' }}>{rec}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
