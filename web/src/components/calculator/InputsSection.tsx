@@ -84,11 +84,20 @@ export function InputsSection() {
         {/* Tool Selection */}
         <EntitySelector
           id="toolId"
-          label="Tool"
+          label="Tool Preset"
           value={store.toolId}
           options={toolOptions}
-          placeholder="Select tool"
-          onChange={(value) => store.setInput('toolId', value)}
+          placeholder="Select tool preset"
+          onChange={(value) => {
+            store.setInput('toolId', value)
+            // Auto-populate tool configuration from preset
+            if (value) {
+              const selectedTool = tools.find(t => t.id === value)
+              if (selectedTool) {
+                store.setToolConfigFromPreset(selectedTool)
+              }
+            }
+          }}
           error={getFieldError('toolId')}
           required
         />
@@ -140,6 +149,145 @@ export function InputsSection() {
         />
         
       </div>
+      
+      {/* Tool Configuration */}
+      <details style={{ marginTop: '16px' }}>
+        <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>Tool Configuration</summary>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: '16px',
+          marginTop: '12px' 
+        }}>
+          
+          {/* Tool Type */}
+          <div>
+            <label htmlFor="toolType" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#333' }}>
+              Tool Type:
+            </label>
+            <select
+              id="toolType"
+              value={store.toolType || ''}
+              onChange={(e) => store.setToolConfig('toolType', e.target.value as typeof store.toolType)}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: 'white', color: '#333' }}
+            >
+              <option value="">Select tool type</option>
+              <option value="endmill_flat">Flat Endmill</option>
+              <option value="drill">Drill</option>
+              <option value="vbit">V-Bit</option>
+              <option value="facemill">Face Mill</option>
+              <option value="boring">Boring Tool</option>
+              <option value="slitting">Slitting Saw</option>
+            </select>
+          </div>
+          
+          {/* Tool Diameter */}
+          <NumericInputWithUnits
+            id="toolDiameter"
+            label="Diameter"
+            unit="mm"
+            value={store.toolDiameter}
+            min={0.1}
+            step={0.1}
+            placeholder="6.0"
+            onChange={(value) => store.setToolConfig('toolDiameter', value)}
+          />
+          
+          {/* Tool Flutes */}
+          <NumericInputWithUnits
+            id="toolFlutes"
+            label="Flutes"
+            value={store.toolFlutes}
+            min={1}
+            step={1}
+            placeholder="2"
+            onChange={(value) => store.setToolConfig('toolFlutes', value)}
+          />
+          
+          {/* Tool Stickout */}
+          <NumericInputWithUnits
+            id="toolStickout"
+            label="Stickout"
+            unit="mm"
+            value={store.toolStickout}
+            min={1}
+            step={0.1}
+            placeholder="25.0"
+            onChange={(value) => store.setToolConfig('toolStickout', value)}
+          />
+          
+          {/* Tool Material */}
+          <div>
+            <label htmlFor="toolMaterial" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#333' }}>
+              Material:
+            </label>
+            <select
+              id="toolMaterial"
+              value={store.toolMaterial || ''}
+              onChange={(e) => store.setToolConfig('toolMaterial', e.target.value)}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: 'white', color: '#333' }}
+            >
+              <option value="">Select material</option>
+              <option value="carbide">Carbide</option>
+              <option value="HSS">High Speed Steel (HSS)</option>
+              <option value="high_speed_steel">High Speed Steel</option>
+              <option value="steel">Steel</option>
+            </select>
+          </div>
+          
+          {/* Tool Coating */}
+          <div>
+            <label htmlFor="toolCoating" style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold', color: '#333' }}>
+              Coating:
+            </label>
+            <select
+              id="toolCoating"
+              value={store.toolCoating || ''}
+              onChange={(e) => store.setToolConfig('toolCoating', e.target.value)}
+              style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: 'white', color: '#333' }}
+            >
+              <option value="">Select coating</option>
+              <option value="uncoated">Uncoated</option>
+              <option value="TiN">TiN (Titanium Nitride)</option>
+              <option value="TiAlN">TiAlN (Titanium Aluminum Nitride)</option>
+              <option value="AlCrN">AlCrN (Aluminum Chromium Nitride)</option>
+              <option value="PVD">PVD Coating</option>
+              <option value="CVD">CVD Coating</option>
+              <option value="DLC">DLC (Diamond-Like Carbon)</option>
+            </select>
+          </div>
+          
+          {/* V-bit Angle (conditional) */}
+          {store.toolType === 'vbit' && (
+            <NumericInputWithUnits
+              id="vbitAngle"
+              label="V-Bit Angle"
+              unit="°"
+              value={store.vbitAngle}
+              min={10}
+              max={180}
+              step={1}
+              placeholder="90"
+              onChange={(value) => store.setToolConfig('vbitAngle', value)}
+            />
+          )}
+          
+          {/* Body Diameter for Face Mills (conditional) */}
+          {store.toolType === 'facemill' && (
+            <NumericInputWithUnits
+              id="bodyDiameter"
+              label="Body Diameter"
+              unit="mm"
+              value={store.bodyDiameter}
+              min={0.1}
+              step={0.1}
+              placeholder="63.0"
+              onChange={(value) => store.setToolConfig('bodyDiameter', value)}
+            />
+          )}
+          
+        </div>
+      </details>
       
       {/* Optional Parameters */}
       <details style={{ marginTop: '16px' }}>
