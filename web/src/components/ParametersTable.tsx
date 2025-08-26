@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useAppContext } from '../hooks/useAppContext'
 import { calculateParameters, type CalculationResult } from '../data/calculations'
+import { getMaterialById } from '../data/materials'
+import DepthOfCutTooltip from './DepthOfCutTooltip'
 
 export default function ParametersTable() {
   const { state, toggleParameterLock } = useAppContext()
@@ -8,6 +10,26 @@ export default function ParametersTable() {
   const [calculations, setCalculations] = useState<CalculationResult[]>([])
   const [showCalculations, setShowCalculations] = useState(false)
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+
+  const getOperationConfig = (calc: CalculationResult) => {
+    // Determine if this is a finishing operation based on the calculated values
+    // Finishing operations typically have smaller depth of cut relative to tool diameter
+    const depthRatio = calc.depthOfCut / toolConfig.diameter
+    const isFinishing = depthRatio < 0.2 // Less than 20% of diameter suggests finishing
+    
+    return {
+      type: calc.operation as any,
+      finish: isFinishing ? 'finishing' as const : 'roughing' as const
+    }
+  }
+
+  const getMaterialForCalculation = (calc: CalculationResult) => {
+    const materialId = selectedMaterials.find(id => {
+      const material = getMaterialById(id)
+      return material?.name === calc.material
+    })
+    return getMaterialById(materialId || selectedMaterials[0])!
+  }
 
   const calculate = () => {
     const results = calculateParameters(
@@ -274,7 +296,18 @@ Industry-validated calculations for CNC machining operations
                       <td>{calc.rpm}</td>
                       <td>{calc.feedRate}</td>
                       <td>{calc.feedPerTooth}</td>
-                      <td>{calc.depthOfCut}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span>{calc.depthOfCut}</span>
+                          <DepthOfCutTooltip
+                            depthOfCut={calc.depthOfCut}
+                            toolConfig={toolConfig}
+                            operation={getOperationConfig(calc)}
+                            material={getMaterialForCalculation(calc)}
+                            units={units}
+                          />
+                        </div>
+                      </td>
                       <td>{calc.stepover}</td>
                       <td>{calc.materialRemovalRate}</td>
                       <td style={{ backgroundColor: calc.spindlePower > 80 ? '#4a3800' : 'transparent' }}>
