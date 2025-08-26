@@ -1,5 +1,6 @@
 import './App.css'
-import { AppProvider, useAppContext } from './context/AppContext'
+import { AppProvider } from './context/AppContext'
+import { useAppContext } from './hooks/useAppContext'
 import MachineConfig from './components/MachineConfig'
 import ToolConfig from './components/ToolConfig'
 import MaterialSelection from './components/MaterialSelection'

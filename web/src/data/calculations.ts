@@ -107,7 +107,7 @@ export class MachiningCalculator {
     const materialRemovalRate = this.calculateMRR(feedRate, depthOfCut, stepover)
     
     // Calculate cutting forces
-    const cuttingForce = this.calculateCuttingForce(material, chipLoad, depthOfCut, stepover)
+    const cuttingForce = this.calculateCuttingForce(material, chipLoad, depthOfCut)
     
     // Calculate spindle power requirements
     const spindlePower = this.calculateSpindlePower(materialRemovalRate, material, machineConfig.spindle.power)
@@ -124,10 +124,10 @@ export class MachiningCalculator {
     }
 
     // Calculate additional useful parameters
-    const chipThickness = this.calculateChipThickness(chipLoad, depthOfCut)
+    const chipThickness = this.calculateChipThickness(chipLoad)
     const toolDeflection = this.calculateToolDeflection(toolConfig, cuttingForce)
     const surfaceFinish = this.calculateSurfaceFinish(feedRate, rpm, toolConfig)
-    const toolLife = this.calculateToolLife(material, toolConfig, rpm, feedRate)
+    const toolLife = this.calculateToolLife(material, toolConfig, rpm)
     const machiningTime = this.calculateMachiningTime(operation, materialRemovalRate)
     const heatGeneration = this.calculateHeatGeneration(materialRemovalRate, material)
     const chatterFrequency = this.calculateChatterFrequency(toolConfig, machineConfig)
@@ -325,7 +325,7 @@ export class MachiningCalculator {
   /**
    * Calculate cutting forces based on material properties and cutting conditions
    */
-  private calculateCuttingForce(material: MaterialProperties, chipLoad: number, depthOfCut: number, _stepover: number): number {
+  private calculateCuttingForce(material: MaterialProperties, chipLoad: number, depthOfCut: number): number {
     // Cutting force formula: F = Kc × chip_area
     // Where Kc is specific cutting force and chip_area is cross-sectional area of chip
     
@@ -388,7 +388,7 @@ export class MachiningCalculator {
    * Calculate actual chip thickness (different from chip load)
    * Accounts for tool engagement and cutting geometry
    */
-  private calculateChipThickness(chipLoad: number, _depthOfCut: number): number {
+  private calculateChipThickness(chipLoad: number): number {
     // Chip thickness = chip load × sin(engagement angle)
     // For simplification, assume average engagement of 60 degrees for endmills
     const engagementAngle = Math.PI / 3 // 60 degrees in radians
@@ -481,7 +481,7 @@ export class MachiningCalculator {
    * Estimate tool life based on cutting conditions
    * Uses Taylor's tool life equation: VT^n = C
    */
-  private calculateToolLife(material: MaterialProperties, toolConfig: ToolConfig, rpm: number, _feedRate: number): number {
+  private calculateToolLife(material: MaterialProperties, toolConfig: ToolConfig, rpm: number): number {
     // Taylor's equation parameters vary by material and tool
     let taylorC: number // Tool life constant
     let taylorN: number // Tool life exponent

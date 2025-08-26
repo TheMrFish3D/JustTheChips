@@ -1,5 +1,5 @@
 // Shared application context for managing configuration state
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useState, type ReactNode } from 'react'
 import type { MachineConfig, ToolConfig, OperationConfig } from '../data/calculations'
 
 interface AppState {
@@ -8,6 +8,12 @@ interface AppState {
   selectedMaterials: string[]
   selectedOperations: OperationConfig[]
   units: 'metric' | 'imperial'
+  lockedParameters: {
+    rpm?: boolean
+    feedRate?: boolean
+    depthOfCut?: boolean
+    stepover?: boolean
+  }
 }
 
 interface AppContextType {
@@ -17,6 +23,7 @@ interface AppContextType {
   setSelectedMaterials: (materials: string[]) => void
   setSelectedOperations: (operations: OperationConfig[]) => void
   setUnits: (units: 'metric' | 'imperial') => void
+  toggleParameterLock: (param: keyof AppState['lockedParameters']) => void
 }
 
 const defaultState: AppState = {
@@ -48,10 +55,13 @@ const defaultState: AppState = {
   selectedOperations: [
     { type: 'slotting', finish: 'roughing' }
   ],
-  units: 'metric'
+  units: 'metric',
+  lockedParameters: {}
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
+
+export { AppContext }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(defaultState)
@@ -87,6 +97,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, units }))
   }
 
+  const toggleParameterLock = (param: keyof AppState['lockedParameters']) => {
+    setState(prev => ({
+      ...prev,
+      lockedParameters: {
+        ...prev.lockedParameters,
+        [param]: !prev.lockedParameters[param]
+      }
+    }))
+  }
+
   return (
     <AppContext.Provider value={{
       state,
@@ -94,17 +114,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateToolConfig,
       setSelectedMaterials,
       setSelectedOperations,
-      setUnits
+      setUnits,
+      toggleParameterLock
     }}>
       {children}
     </AppContext.Provider>
   )
-}
-
-export function useAppContext() {
-  const context = useContext(AppContext)
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider')
-  }
-  return context
 }

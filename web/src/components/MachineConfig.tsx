@@ -1,4 +1,4 @@
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from '../hooks/useAppContext'
 
 export default function MachineConfig() {
   const { state, updateMachineConfig } = useAppContext()

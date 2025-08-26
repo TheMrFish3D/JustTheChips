@@ -1,4 +1,4 @@
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from '../hooks/useAppContext'
 import type { OperationConfig } from '../data/calculations'
 
 export default function OperationSelection() {
