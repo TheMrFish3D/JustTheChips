@@ -65,14 +65,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Educational Content Research Tasks
 
-### 7. CNC Parameter Education Research
-**Priority:** Medium
-**Estimated Effort:** 3-4 hours
-**Description:** Research educational content for CNC parameters
-- Compile explanations for spindle speed effects on cut quality
-- Research feed rate impact on surface finish and tool life
-- Document chip load relationships with material removal and tool wear
-- Create troubleshooting guides for common issues
+
 
 ### 8. Hobby Machine Limitations Research
 **Priority:** Medium  
