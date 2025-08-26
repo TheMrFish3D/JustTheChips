@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -50,18 +48,17 @@ jobs:
       run: |
         cd web
         npm run build
+        # Add .nojekyll to prevent Jekyll processing
+        touch dist/.nojekyll
         
     - name: Setup Pages
-      if: github.ref == 'refs/heads/main'
       uses: actions/configure-pages@v4
       
     - name: Upload artifact
-      if: github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./web/dist
         
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
       id: deployment
       uses: actions/deploy-pages@v4
