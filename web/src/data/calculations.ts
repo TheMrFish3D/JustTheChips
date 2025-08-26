@@ -25,9 +25,15 @@ export interface ToolConfig {
   type: 'flat-endmill' | 'ball-endmill' | 'insert-endmill' | 'drill' | 'threadmill' | 'vbit' | 'chamfer'
   diameter: number     // mm or inches
   flutes: number
-  stickout: number     // mm or inches
+  stickout: number     // mm or inches - total stickout from spindle face
   material: 'hss' | 'carbide' | 'ceramic' | 'diamond'
   coating: 'none' | 'tin' | 'ticn' | 'tialn' | 'dlc' | 'diamond'
+  // Tool deflection analysis specific fields
+  holderType: 'collet' | 'shrink-fit' | 'hydraulic' | 'side-lock' | 'end-mill-holder' | 'drill-chuck'
+  projectionLength: number    // mm or inches - actual cutting tool projection beyond holder
+  coreDiameter?: number | null       // mm or inches - tool core diameter (optional, calculated if not provided)
+  helixAngle?: number | null         // degrees - helix angle (affects cutting forces)
+  runoutTolerance?: number | null    // mm or inches - tool runout (affects cutting forces)
 }
 
 export interface OperationConfig {
@@ -528,12 +534,15 @@ export class MachiningCalculator {
       // Estimate cutting force for this depth
       const estimatedForce = forceCoefficient * depth * (diameter * 0.1) // Simplified
       
-      // Calculate deflection
-      const deflection = this.calculateLateralDeflection(
+      // Calculate tool deflection using tool-specific analysis
+      const materialProps = this.getToolMaterialProperties(toolConfig.material)
+      const holderStiffnessFactor = this.getToolHolderStiffnessFactor(toolConfig.holderType)
+      const deflection = this.calculateToolLateralDeflection(
         estimatedForce,
-        toolConfig.stickout,
+        toolConfig.projectionLength,
         this.getEffectiveToolDiameter(toolConfig),
-        this.getToolMaterialProperties(toolConfig.material).elasticModulus
+        materialProps.elasticModulus,
+        holderStiffnessFactor
       )
       
       if (deflection <= maxAcceptableDeflection) {
@@ -813,44 +822,50 @@ export class MachiningCalculator {
 
   /**
    * Comprehensive tool deflection analysis
-   * Based on cantilever beam mechanics with multiple failure modes
+   * Focuses on cutting tool deformation under machining forces
    */
   private calculateComprehensiveDeflection(toolConfig: ToolConfig, cuttingForce: number) {
-    const length = toolConfig.stickout
+    // Tool deflection analysis considers the actual cutting tool characteristics
+    const projectionLength = toolConfig.projectionLength
     
     // Tool material properties based on comprehensive research
     const materialProps = this.getToolMaterialProperties(toolConfig.material)
     
-    // Calculate effective diameter considering flute depth
+    // Calculate effective tool diameter considering actual geometry
     const effectiveDiameter = this.getEffectiveToolDiameter(toolConfig)
     
-    // Calculate different deflection modes
-    const lateralDeflection = this.calculateLateralDeflection(
-      cuttingForce, length, effectiveDiameter, materialProps.elasticModulus
+    // Tool holder stiffness affects overall system compliance
+    const holderStiffnessFactor = this.getToolHolderStiffnessFactor(toolConfig.holderType)
+    
+    // Calculate tool-specific deflection modes
+    const toolLateralDeflection = this.calculateToolLateralDeflection(
+      cuttingForce, projectionLength, effectiveDiameter, materialProps.elasticModulus, holderStiffnessFactor
     )
     
-    const torsionalDeflection = this.calculateTorsionalDeflection(
-      toolConfig, materialProps.shearModulus
+    const toolTorsionalDeflection = this.calculateToolTorsionalDeflection(
+      toolConfig, materialProps.shearModulus, holderStiffnessFactor
     )
     
-    const dynamicFactor = this.getDynamicAmplificationFactor(toolConfig, materialProps)
+    // Dynamic effects specific to rotating cutting tools
+    const dynamicFactor = this.getToolDynamicAmplificationFactor(toolConfig, materialProps)
     
-    // Combined deflection with safety factors
+    // Combined tool deflection (not beam deflection)
     const staticDeflection = Math.sqrt(
-      Math.pow(lateralDeflection, 2) + Math.pow(torsionalDeflection, 2)
+      Math.pow(toolLateralDeflection, 2) + Math.pow(toolTorsionalDeflection, 2)
     )
     
-    const totalDeflection = staticDeflection * dynamicFactor
+    const totalToolDeflection = staticDeflection * dynamicFactor
     
     return {
-      lateralDeflection,
-      torsionalDeflection, 
+      lateralDeflection: toolLateralDeflection,
+      torsionalDeflection: toolTorsionalDeflection, 
       staticDeflection,
-      totalDeflection,
+      totalDeflection: totalToolDeflection,
       dynamicFactor,
-      naturalFrequency: this.calculateNaturalFrequency(toolConfig, materialProps),
+      naturalFrequency: this.calculateToolNaturalFrequency(toolConfig, materialProps),
       effectiveDiameter,
-      materialProps
+      materialProps,
+      holderStiffnessFactor
     }
   }
 
@@ -889,14 +904,89 @@ export class MachiningCalculator {
   }
 
   /**
-   * Calculate effective tool diameter considering flute geometry
+   * Calculate effective tool diameter considering actual geometry
    */
   private getEffectiveToolDiameter(toolConfig: ToolConfig): number {
-    // Flute depth reduces effective stiffness
+    // Use provided core diameter if available, otherwise calculate from flutes
+    if (toolConfig.coreDiameter && toolConfig.coreDiameter > 0) {
+      return toolConfig.coreDiameter
+    }
+    
+    // Fallback to flute-based calculation
     const fluteDepthRatio = this.getFluteDepthRatio(toolConfig.flutes)
     const coreRatio = 1 - fluteDepthRatio
     
     return toolConfig.diameter * coreRatio
+  }
+
+  /**
+   * Get tool holder stiffness factor based on holder type
+   */
+  private getToolHolderStiffnessFactor(holderType: string): number {
+    // Stiffness factors relative to rigid clamping (1.0 = perfect rigidity)
+    const stiffnessFactors = {
+      'shrink-fit': 0.95,      // Excellent clamping stiffness
+      'hydraulic': 0.90,       // Very good uniform clamping
+      'collet': 0.85,          // Good for small tools
+      'side-lock': 0.80,       // Good for larger tools with flats
+      'end-mill-holder': 0.70, // Set screw clamping
+      'drill-chuck': 0.60      // Weakest clamping method
+    }
+    
+    return stiffnessFactors[holderType as keyof typeof stiffnessFactors] || 0.75
+  }
+
+  /**
+   * Calculate tool lateral deflection considering holder compliance
+   * Uses tool projection length rather than total stickout
+   */
+  private calculateToolLateralDeflection(
+    force: number, 
+    projectionLength: number, 
+    diameter: number, 
+    elasticModulus: number,
+    holderStiffnessFactor: number
+  ): number {
+    // Moment of inertia for circular cross-section: I = π × d⁴ / 64
+    const momentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 64
+    
+    // Tool deflection with holder compliance consideration
+    const toolDeflection = (force * Math.pow(projectionLength, 3)) / (3 * elasticModulus * momentOfInertia)
+    
+    // Adjust for holder stiffness (lower stiffness = more deflection)
+    const adjustedDeflection = toolDeflection / holderStiffnessFactor
+    
+    return Math.abs(adjustedDeflection)
+  }
+
+  /**
+   * Calculate tool torsional deflection under cutting torque
+   * Considers holder torsional stiffness
+   */
+  private calculateToolTorsionalDeflection(
+    toolConfig: ToolConfig, 
+    shearModulus: number, 
+    holderStiffnessFactor: number
+  ): number {
+    const diameter = this.getEffectiveToolDiameter(toolConfig)
+    const projectionLength = toolConfig.projectionLength
+    
+    // Estimate cutting torque based on tool-specific characteristics
+    const estimatedTorque = this.estimateToolCuttingTorque(toolConfig)
+    
+    // Polar moment of inertia: J = π × d⁴ / 32
+    const polarMomentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 32
+    
+    // Angle of twist: θ = (T × L) / (G × J)
+    const angleOfTwist = (estimatedTorque * projectionLength) / (shearModulus * polarMomentOfInertia)
+    
+    // Convert angular deflection to linear deflection at tool tip
+    const linearTorsionalDeflection = angleOfTwist * (diameter / 2)
+    
+    // Adjust for holder torsional stiffness
+    const adjustedDeflection = linearTorsionalDeflection / holderStiffnessFactor
+    
+    return Math.abs(adjustedDeflection)
   }
 
   /**
@@ -915,56 +1005,16 @@ export class MachiningCalculator {
   }
 
   /**
-   * Calculate lateral deflection using cantilever beam formula
-   * δ = (F × L³) / (3 × E × I)
+   * Estimate cutting torque based on tool-specific characteristics
+   * More accurate than the previous generic estimation
    */
-  private calculateLateralDeflection(
-    force: number, 
-    length: number, 
-    diameter: number, 
-    elasticModulus: number
-  ): number {
-    // Moment of inertia for circular cross-section: I = π × d⁴ / 64
-    const momentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 64
-    
-    // Cantilever beam deflection formula
-    const deflection = (force * Math.pow(length, 3)) / (3 * elasticModulus * momentOfInertia)
-    
-    return Math.abs(deflection)
-  }
-
-  /**
-   * Calculate torsional deflection under cutting torque
-   * θ = (T × L) / (G × J), then convert to linear deflection at tool tip
-   */
-  private calculateTorsionalDeflection(toolConfig: ToolConfig, shearModulus: number): number {
-    const diameter = this.getEffectiveToolDiameter(toolConfig)
-    const length = toolConfig.stickout
-    
-    // Estimate cutting torque from tool diameter and typical forces
-    const estimatedTorque = this.estimateCuttingTorque(toolConfig)
-    
-    // Polar moment of inertia: J = π × d⁴ / 32
-    const polarMomentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 32
-    
-    // Angle of twist: θ = (T × L) / (G × J)
-    const angleOfTwist = (estimatedTorque * length) / (shearModulus * polarMomentOfInertia)
-    
-    // Convert angular deflection to linear deflection at tool tip
-    const linearTorsionalDeflection = angleOfTwist * (diameter / 2)
-    
-    return Math.abs(linearTorsionalDeflection)
-  }
-
-  /**
-   * Estimate cutting torque based on tool geometry and typical cutting conditions
-   */
-  private estimateCuttingTorque(toolConfig: ToolConfig): number {
+  private estimateToolCuttingTorque(toolConfig: ToolConfig): number {
     const radius = toolConfig.diameter / 2
     
-    // Typical torque coefficients based on tool type and material
+    // Torque coefficients based on specific tool characteristics
     let torqueCoefficient = 0.3 // Base coefficient
     
+    // Adjust based on tool type and geometry
     switch (toolConfig.type) {
       case 'flat-endmill':
         torqueCoefficient = 0.4
@@ -972,13 +1022,30 @@ export class MachiningCalculator {
       case 'ball-endmill':
         torqueCoefficient = 0.35
         break
+      case 'insert-endmill':
+        torqueCoefficient = 0.45 // Higher due to positive geometry
+        break
       case 'drill':
         torqueCoefficient = 0.5
         break
     }
     
-    // Estimate torque: T = F_tangential × radius
-    // Assuming moderate cutting conditions
+    // Adjust for helix angle if provided
+    if (toolConfig.helixAngle && toolConfig.helixAngle > 0) {
+      // Higher helix angle reduces cutting forces
+      const helixFactor = 1.0 - (toolConfig.helixAngle - 30) * 0.005
+      torqueCoefficient *= Math.max(0.8, Math.min(1.2, helixFactor))
+    }
+    
+    // Adjust for runout if provided
+    if (toolConfig.runoutTolerance && toolConfig.runoutTolerance > 0) {
+      // Higher runout increases force variation and average forces
+      const runoutLimit = this.units === 'metric' ? 0.01 : 0.0004
+      const runoutFactor = 1.0 + (toolConfig.runoutTolerance / runoutLimit) * 0.1
+      torqueCoefficient *= Math.min(1.5, runoutFactor)
+    }
+    
+    // Estimate torque based on tool-specific parameters
     const estimatedRadialForce = 100 * Math.pow(toolConfig.diameter, 1.2) // Empirical scaling
     const torque = estimatedRadialForce * radius * torqueCoefficient
     
@@ -986,18 +1053,19 @@ export class MachiningCalculator {
   }
 
   /**
-   * Calculate natural frequency of the tool as cantilever beam
-   * f_n = (λ² / (2π)) × √(EI / (ρA × L⁴))
+   * Calculate natural frequency of the cutting tool (not generic beam)
+   * Considers tool holder interface effects
    */
-  private calculateNaturalFrequency(
+  private calculateToolNaturalFrequency(
     toolConfig: ToolConfig, 
     materialProps: any
   ): number {
     const diameter = this.getEffectiveToolDiameter(toolConfig)
-    const length = toolConfig.stickout
+    const projectionLength = toolConfig.projectionLength
+    const holderStiffnessFactor = this.getToolHolderStiffnessFactor(toolConfig.holderType)
     
-    // First mode eigenvalue for cantilever beam
-    const lambda1 = 1.875
+    // Modified eigenvalue for tool holder interface (not pure cantilever)
+    const lambda1 = 1.875 * Math.sqrt(holderStiffnessFactor) // Adjusted for holder stiffness
     
     // Cross-sectional area
     const area = Math.PI * Math.pow(diameter, 2) / 4
@@ -1005,45 +1073,51 @@ export class MachiningCalculator {
     // Moment of inertia
     const momentOfInertia = Math.PI * Math.pow(diameter, 4) / 64
     
-    // Natural frequency calculation
+    // Natural frequency calculation with holder effects
     const frequency = (Math.pow(lambda1, 2) / (2 * Math.PI)) * 
       Math.sqrt((materialProps.elasticModulus * momentOfInertia) / 
-                (materialProps.density * area * Math.pow(length, 4)))
+                (materialProps.density * area * Math.pow(projectionLength, 4)))
     
     return frequency
   }
 
   /**
-   * Calculate dynamic amplification factor for vibration effects
+   * Calculate dynamic amplification factor for rotating cutting tools
+   * Different from generic beam vibration
    */
-  private getDynamicAmplificationFactor(toolConfig: ToolConfig, materialProps: any): number {
-    const naturalFreq = this.calculateNaturalFrequency(toolConfig, materialProps)
+  private getToolDynamicAmplificationFactor(toolConfig: ToolConfig, materialProps: any): number {
+    const naturalFreq = this.calculateToolNaturalFrequency(toolConfig, materialProps)
     
-    // Estimate typical spindle speed for dynamic analysis
-    const typicalRpm = Math.min(20000, 150000 / toolConfig.diameter) // Empirical scaling
+    // Estimate actual cutting speed based on tool diameter and typical practices
+    const typicalRpm = Math.min(24000, 150000 / toolConfig.diameter) // More realistic RPM estimation
     const spindleFreq = typicalRpm / 60 // Convert to Hz
     
-    // Frequency ratio
-    const frequencyRatio = spindleFreq / naturalFreq
+    // Tool passing frequency (flutes × spindle frequency)
+    const toolPassingFreq = toolConfig.flutes * spindleFreq
     
-    // Dynamic amplification factor (simplified)
-    // Assumes moderate damping ratio of 0.05
-    const dampingRatio = 0.05
+    // Check multiple frequency ratios for cutting tool dynamics
+    const spindleRatio = spindleFreq / naturalFreq
+    const passingRatio = toolPassingFreq / naturalFreq
+    
+    // Dynamic amplification factors for cutting tools
+    const dampingRatio = 0.03 // Lower damping for rotating tools
     let dynamicFactor = 1.0
     
-    if (frequencyRatio < 0.7) {
-      // Below resonance - minimal amplification
-      dynamicFactor = 1.0 + 0.1 * frequencyRatio
-    } else if (frequencyRatio < 1.5) {
-      // Near resonance - significant amplification
-      dynamicFactor = 1.0 / (2 * dampingRatio) // Simplified resonance amplification
-      dynamicFactor = Math.min(dynamicFactor, 5.0) // Cap at 5x
-    } else {
-      // Above resonance - mass-controlled region
-      dynamicFactor = 1.0 + 0.2 / Math.pow(frequencyRatio, 2)
+    // Check spindle frequency effects
+    if (spindleRatio > 0.7 && spindleRatio < 1.3) {
+      dynamicFactor = Math.max(dynamicFactor, 1.0 / (2 * dampingRatio))
     }
     
-    return Math.max(dynamicFactor, 1.0)
+    // Check tool passing frequency effects (more critical)
+    if (passingRatio > 0.8 && passingRatio < 1.2) {
+      dynamicFactor = Math.max(dynamicFactor, 1.5 / (2 * dampingRatio))
+    }
+    
+    // Consider holder stiffness effects on damping
+    const holderStiffnessFactor = this.getToolHolderStiffnessFactor(toolConfig.holderType)
+    dynamicFactor *= (2.0 - holderStiffnessFactor) // Lower stiffness = higher amplification
+    
+    return Math.max(1.0, Math.min(8.0, dynamicFactor)) // Reasonable bounds for cutting tools
   }
 
   /**

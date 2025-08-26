@@ -126,7 +126,7 @@ export default function DeflectionTooltip({
         >
           <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, color: '#4a90e2', fontSize: '16px' }}>
-              🔧 Comprehensive Tool Deflection Analysis
+              🔧 Tool Deflection Analysis
             </h3>
             <button
               onClick={() => setIsOpen(false)}
@@ -157,40 +157,59 @@ export default function DeflectionTooltip({
 
           {/* Calculation Breakdown */}
           <div style={{ background: '#252525', padding: '12px', borderRadius: '6px', marginBottom: '15px' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#9b59b6' }}>📐 Calculation Breakdown</h4>
+            <h4 style={{ margin: '0 0 8px 0', color: '#9b59b6' }}>📐 Tool Deflection Calculation</h4>
             
             <div style={{ marginBottom: '10px' }}>
-              <strong>1. Lateral Deflection (Cantilever Beam):</strong>
+              <strong>1. Tool Lateral Deflection:</strong>
               <div style={{ marginLeft: '15px', fontFamily: 'monospace', background: '#1e1e1e', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
-                δ_lateral = (F × L³) / (3 × E × I)<br/>
-                δ_lateral = ({cuttingForce} {forceUnit} × {toolConfig.stickout}³ {lengthUnit}) / (3 × {getToolMaterialStiffness(toolConfig.material)} {stiffnessUnit} × π×d⁴/64)<br/>
-                δ_lateral = <strong>{deflectionAnalysis.lateralDeflection} {lengthUnit}</strong>
+                δ_tool = (F × L³) / (3 × E × I × K_holder)<br/>
+                δ_tool = ({cuttingForce} {forceUnit} × {toolConfig.projectionLength}³ {lengthUnit}) / (3 × {getToolMaterialStiffness(toolConfig.material)} {stiffnessUnit} × π×d⁴/64 × K_h)<br/>
+                δ_tool = <strong>{deflectionAnalysis.lateralDeflection} {lengthUnit}</strong>
+              </div>
+              <div style={{ marginLeft: '15px', fontSize: '11px', color: '#ccc', marginTop: '4px' }}>
+                Where K_holder = {(deflectionAnalysis as any).holderStiffnessFactor || 'N/A'} (tool holder stiffness factor)
               </div>
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-              <strong>2. Effective Tool Diameter:</strong>
+              <strong>2. Tool Holder Effects:</strong>
               <div style={{ marginLeft: '15px' }}>
-                Core diameter considering {getFluteMaterialRemoval(toolConfig.flutes)} flute material removal<br/>
-                D_effective = {toolConfig.diameter} × core_ratio = <strong>{deflectionAnalysis.effectiveDiameter} {lengthUnit}</strong>
+                Holder Type: <strong>{toolConfig.holderType}</strong><br/>
+                Stiffness Factor: <strong>{(deflectionAnalysis as any).holderStiffnessFactor || 'N/A'}</strong><br/>
+                Projection Length: <strong>{toolConfig.projectionLength} {lengthUnit}</strong> (vs {toolConfig.stickout} {lengthUnit} total stickout)
               </div>
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-              <strong>3. Natural Frequency:</strong>
+              <strong>3. Effective Tool Core:</strong>
+              <div style={{ marginLeft: '15px' }}>
+                {toolConfig.coreDiameter ? 
+                  `Specified core diameter: ${toolConfig.coreDiameter} ${lengthUnit}` :
+                  `Calculated from ${toolConfig.flutes} flutes: ${getFluteMaterialRemoval(toolConfig.flutes)} material removal`
+                }<br/>
+                D_effective = <strong>{deflectionAnalysis.effectiveDiameter} {lengthUnit}</strong>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '10px' }}>
+              <strong>4. Tool Natural Frequency:</strong>
               <div style={{ marginLeft: '15px', fontFamily: 'monospace', background: '#1e1e1e', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
-                f_n = (λ₁² / 2π) × √(EI / ρAL⁴)<br/>
+                f_n = (λ₁² / 2π) × √(EI / ρAL⁴) × √K_holder<br/>
                 f_n = <strong>{deflectionAnalysis.naturalFrequency} Hz</strong>
               </div>
             </div>
 
             <div>
-              <strong>4. Dynamic Amplification:</strong>
+              <strong>5. Dynamic Amplification (Cutting Tool):</strong>
               <div style={{ marginLeft: '15px' }}>
-                {deflectionAnalysis.dynamicFactor > 1.5 ? 
-                  `High dynamic amplification (${deflectionAnalysis.dynamicFactor}x) - consider speed adjustment` :
-                  `Acceptable dynamic response (${deflectionAnalysis.dynamicFactor}x)`
+                {deflectionAnalysis.dynamicFactor > 2.0 ? 
+                  `High dynamic amplification (${deflectionAnalysis.dynamicFactor}x) - check spindle/flute passing frequencies` :
+                  `Acceptable dynamic response (${deflectionAnalysis.dynamicFactor}x) for rotating cutting tool`
                 }
+                <br/>
+                <em style={{ fontSize: '11px', color: '#ccc' }}>
+                  Considers spindle frequency and {toolConfig.flutes}-flute passing frequency
+                </em>
               </div>
             </div>
           </div>
@@ -250,11 +269,12 @@ export default function DeflectionTooltip({
           <div style={{ background: '#4a3800', padding: '12px', borderRadius: '6px', border: '1px solid #f39c12' }}>
             <h4 style={{ margin: '0 0 8px 0', color: '#f39c12' }}>⚠️ Professional Engineering Notes</h4>
             <div style={{ fontSize: '11px', lineHeight: '1.3' }}>
-              <div>• Deflection calculations based on cantilever beam mechanics with dynamic amplification</div>
-              <div>• Actual machine compliance may further increase total system deflection</div>
-              <div>• Consider workpiece clamping rigidity and setup dynamics</div>
-              <div>• Validate calculations with test cuts for critical applications</div>
-              <div>• Temperature effects and tool wear will modify deflection over time</div>
+              <div>• Tool deflection analysis based on cutting tool mechanics with holder interface effects</div>
+              <div>• Machine structure compliance adds additional deflection not included here</div>
+              <div>• Tool holder stiffness significantly affects total system compliance</div>
+              <div>• Validate calculations with test cuts for critical dimensional applications</div>
+              <div>• Tool wear and temperature effects will modify deflection characteristics over time</div>
+              <div>• Consider dynamic effects of spindle/tool passing frequencies for chatter avoidance</div>
               <div>• Always verify parameters are within machine and safety capabilities</div>
             </div>
           </div>
