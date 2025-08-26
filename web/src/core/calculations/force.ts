@@ -1,4 +1,5 @@
 import type { Material, Tool } from '../data/schemas/index.js'
+import { getToolProperties } from '../data/toolMaterials.js'
 
 /**
  * Warning types for force calculations
@@ -13,11 +14,21 @@ export interface ForceCalculationWarning {
  * Result of force calculations
  */
 export interface ForceCalculationResult {
-  chipAreaMm2: number        // Chip cross-sectional area
-  baseForceMaterialN: number // Base force from material properties
-  toolForceMultiplier: number // Tool-specific force multiplier
-  totalForceN: number        // Final cutting force
+  chipAreaMm2: number                 // Chip cross-sectional area
+  baseForceMaterialN: number          // Base force from material properties
+  toolTypeMultiplier: number          // Tool type force multiplier
+  toolMaterialMultiplier: number      // Tool material/coating force multiplier
+  totalForceN: number                 // Final cutting force
   warnings: ForceCalculationWarning[]
+}
+
+/**
+ * Get tool material force multiplier based on tool material and coating
+ * Uses researched data for material and coating effects on cutting forces
+ */
+export function getToolMaterialForceMultiplier(tool: Tool): number {
+  const toolProps = getToolProperties(tool.material, tool.coating)
+  return toolProps.combinedProps.effectiveForceReduction
 }
 
 /**
@@ -64,11 +75,12 @@ export function calculateCuttingForce(
   // Calculate base force from material properties: F = force_coeff × A × 1000
   const baseForceMaterialN = material.force_coeff_kn_mm2 * chipAreaMm2 * 1000
 
-  // Get tool-specific force multiplier
-  const toolForceMultiplier = getToolForceMultiplier(tool.type)
+  // Get tool-specific force multipliers
+  const toolTypeMultiplier = getToolForceMultiplier(tool.type)
+  const toolMaterialMultiplier = getToolMaterialForceMultiplier(tool)
 
-  // Calculate total cutting force
-  const totalForceN = baseForceMaterialN * toolForceMultiplier
+  // Calculate total cutting force with both tool type and material effects
+  const totalForceN = baseForceMaterialN * toolTypeMultiplier * toolMaterialMultiplier
 
   // Generate warnings for high forces
   // Use tool diameter as reference for force warnings
@@ -91,7 +103,8 @@ export function calculateCuttingForce(
   return {
     chipAreaMm2,
     baseForceMaterialN,
-    toolForceMultiplier,
+    toolTypeMultiplier,
+    toolMaterialMultiplier,
     totalForceN,
     warnings
   }

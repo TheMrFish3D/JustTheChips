@@ -1,6 +1,7 @@
 import type { Machine } from '../data/schemas/machine.js'
 import type { Material } from '../data/schemas/material.js'
 import type { Tool } from '../data/schemas/tool.js'
+import { getToolProperties } from '../data/toolMaterials.js'
 import { clamp } from '../utils/math.js'
 
 export interface ChiploadCalculationWarning {
@@ -42,26 +43,24 @@ export function getToolChiploadFactor(toolType: Tool['type']): number {
 }
 
 /**
- * Get coating factor for chipload
+ * Get tool material and coating factor for chipload
+ * Uses researched industry data instead of estimates
+ */
+export function getToolMaterialChiploadFactor(tool: Tool): number {
+  const toolProps = getToolProperties(tool.material, tool.coating)
+  return toolProps.combinedProps.effectiveChiploadMultiplier
+}
+
+/**
+ * Get coating factor for chipload (DEPRECATED - use getToolMaterialChiploadFactor)
  * Different coatings allow for different chipload adjustments
  */
 export function getCoatingFactor(coating: string): number {
-  // Simple coating factors - could be expanded with more detailed mapping
-  switch (coating.toLowerCase()) {
-    case 'uncoated':
-      return 1.0
-    case 'tin':
-      return 1.1
-    case 'altin':
-      return 1.2
-    case 'alcrn':
-      return 1.15
-    case 'diamond':
-      return 1.3
-    default:
-      // Default for unknown coatings
-      return 1.0
-  }
+  console.warn('getCoatingFactor is deprecated - use getToolMaterialChiploadFactor for better accuracy')
+  
+  // Use new system for better accuracy
+  const coatingProps = getToolProperties('HSS', coating)
+  return coatingProps.coatingProps.chiploadBoost
 }
 
 /**
@@ -157,12 +156,13 @@ export function calculateChiploadAndFeed(
   // Get chipload range for this diameter
   const [fzMin, fzMax] = getChiploadRange(material, effectiveDiameter)
   
-  // Calculate base chipload
+  // Calculate base chipload using researched tool material properties
   const fzRangeAverage = (fzMin + fzMax) / 2
-  const toolFactor = getToolChiploadFactor(tool.type)
-  const coatingFactor = getCoatingFactor(tool.coating)
+  const toolTypeFactor = getToolChiploadFactor(tool.type)
+  const toolMaterialFactor = getToolMaterialChiploadFactor(tool)
   
-  const fzBase = fzRangeAverage * aggressiveness * toolFactor * coatingFactor
+  // Combine tool type and material factors
+  const fzBase = fzRangeAverage * aggressiveness * toolTypeFactor * toolMaterialFactor
 
   // Apply chip thinning if conditions are met
   let fzAdjusted = fzBase

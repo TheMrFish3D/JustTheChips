@@ -1,5 +1,7 @@
 import type { Material } from '../data/schemas/material.js'
 import type { Spindle } from '../data/schemas/spindle.js'
+import type { Tool } from '../data/schemas/tool.js'
+import { getToolProperties, getToolMaterialRecommendations } from '../data/toolMaterials.js'
 import { clamp } from '../utils/math.js'
 
 export type CutType = 'slot' | 'profile' | 'adaptive' | 'facing' | 'drilling' | 'boring'
@@ -42,14 +44,15 @@ export function getSpeedFactor(cutType: CutType): number {
 }
 
 /**
- * Calculate surface speed and RPM with spindle clamping and warnings
+ * Calculate surface speed and RPM with tool material factors and spindle clamping
  */
 export function calculateSpeedAndRPM(
   material: Material,
   spindle: Spindle,
   effectiveDiameter: number,
   cutType: CutType,
-  aggressiveness: number = 1.0
+  aggressiveness: number = 1.0,
+  tool?: Tool  // Optional tool for material-specific adjustments
 ): SpeedCalculationResult {
   // Validate inputs
   if (effectiveDiameter <= 0) {
@@ -63,7 +66,20 @@ export function calculateSpeedAndRPM(
   const [vcMin, vcMax] = material.vc_range_m_min
   const vcBase = (vcMin + vcMax) / 2  // Average of range
   const speedFactor = getSpeedFactor(cutType)
-  const vcTarget = vcBase * speedFactor * aggressiveness
+  
+  // Apply tool material factors if tool is provided
+  let toolMaterialFactor = 1.0
+  let materialRecommendations: string[] = []
+  
+  if (tool) {
+    const toolProps = getToolProperties(tool.material, tool.coating)
+    const recommendations = getToolMaterialRecommendations(tool.material, material.category)
+    
+    toolMaterialFactor = recommendations.recommendedSurfaceSpeedMultiplier
+    materialRecommendations = recommendations.notes
+  }
+  
+  const vcTarget = vcBase * speedFactor * aggressiveness * toolMaterialFactor
 
   // Calculate theoretical RPM: rpm = (vc × 1000) / (π × D_eff)
   const rpmTheoretical = (vcTarget * 1000) / (Math.PI * effectiveDiameter)
@@ -84,6 +100,15 @@ export function calculateSpeedAndRPM(
       severity: 'warning'
     })
   }
+  
+  // Add tool material recommendations as warnings if applicable
+  materialRecommendations.forEach(note => {
+    warnings.push({
+      type: 'rpm_limited', // Reuse existing type for now
+      message: note,
+      severity: 'warning'
+    })
+  })
 
   return {
     vcTarget,

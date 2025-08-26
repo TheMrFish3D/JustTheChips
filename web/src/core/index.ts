@@ -81,7 +81,8 @@ export function calculate(inputs: Inputs): CalculationResults {
     spindle, 
     effectiveDiameter, 
     inputs.cutType, 
-    inputs.aggressiveness ?? 1.0
+    inputs.aggressiveness ?? 1.0,
+    tool  // Pass tool for material-specific speed adjustments
   )
 
   const chiploadResult = calculateChiploadAndFeed(
@@ -209,7 +210,8 @@ export function calculateWithToolConfig(
     spindle, 
     effectiveDiameter, 
     inputs.cutType, 
-    inputs.aggressiveness ?? 1.0
+    inputs.aggressiveness ?? 1.0,
+    tool  // Pass tool for material-specific speed adjustments
   )
 
   const chiploadResult = calculateChiploadAndFeed(
