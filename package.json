@@ -1,17 +1,14 @@
 {
-  "name": "justthechips",
-  "version": "0.1.0",
-  "description": "1. Purpose Provide accurate spindle speeds, feed rates, power requirements, and tool deflection estimates for CNC machining operations across various materials, tools, machines, and cutting conditions.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
+  "name": "just-the-chips",
+  "version": "1.0.0",
+  "description": "A simple web-based feeds and speeds calculator for CNC machining",
+  "scripts": {
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "preview": "cd web && npm run preview",
+    "lint": "cd web && npm run lint"
   },
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@playwright/test": "^1.55.0",
-    "@types/node": "^24.3.0"
-  }
+  "keywords": ["cnc", "machining", "feeds", "speeds", "calculator"],
+  "author": "TheMrFish3D",
+  "license": "MIT"
 }

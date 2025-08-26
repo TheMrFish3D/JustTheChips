@@ -36,7 +36,7 @@ echo "✅ npm $(npm --version) detected"
 # Install root dependencies
 echo ""
 echo "📦 Installing root dependencies..."
-npm install
+npm install --ignore-scripts || true
 
 # Navigate to web directory and install dependencies
 echo ""
