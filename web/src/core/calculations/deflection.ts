@@ -1,4 +1,5 @@
 import type { Tool } from '../data/schemas/index.js'
+import { getToolProperties } from '../data/toolMaterials.js'
 import { clamp } from '../utils/math.js'
 
 /**
@@ -62,12 +63,12 @@ export const MATERIAL_MODULUS_GPA = {
 export const DEFAULT_HOLDER_COMPLIANCE_MM_PER_N = 0.002
 
 /**
- * Estimate tool mass for natural frequency calculation
- * Based on tool diameter and length, assuming typical tool densities
+ * Estimate tool mass for natural frequency calculation using accurate material data
+ * Based on tool diameter and length, using researched tool densities
  */
 export function estimateToolMass(tool: Tool): number {
-  // Carbide density ~14.5 g/cm³, HSS ~8.0 g/cm³
-  const density = tool.material.toLowerCase().includes('carbide') ? 14.5 : 8.0
+  // Get accurate density from researched data
+  const density = getToolDensity(tool.material)
   
   // Volume approximation: cylindrical tool
   const radiusMm = tool.diameter_mm / 2
@@ -78,11 +79,19 @@ export function estimateToolMass(tool: Tool): number {
 }
 
 /**
- * Get Young's modulus for tool material
+ * Get Young's modulus for tool material using researched data
  */
 export function getYoungsModulus(material: string): number {
-  const materialKey = material.toLowerCase() as keyof typeof MATERIAL_MODULUS_GPA
-  return MATERIAL_MODULUS_GPA[materialKey] ?? MATERIAL_MODULUS_GPA.default
+  const toolProps = getToolProperties(material, 'uncoated')
+  return toolProps.materialProps.youngsModulusGPa
+}
+
+/**
+ * Get accurate tool density using researched data
+ */
+export function getToolDensity(material: string): number {
+  const toolProps = getToolProperties(material, 'uncoated')
+  return toolProps.materialProps.densityGPerCm3
 }
 
 /**

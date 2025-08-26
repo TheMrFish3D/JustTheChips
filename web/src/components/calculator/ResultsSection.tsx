@@ -170,7 +170,7 @@ function WarningsList({ warnings }: { warnings: Array<{type: string, message: st
   
   return (
     <div style={{ marginTop: '16px' }}>
-      <h4 style={{ margin: '0 0 12px 0', color: '#495057' }}>Analysis Warnings</h4>
+      <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Analysis Warnings</h4>
       {renderWarningGroup(dangerWarnings, 'Critical Issues', '#dc3545', '#f8d7da')}
       {renderWarningGroup(regularWarnings, 'Recommendations', '#fd7e14', '#fff3cd')}
     </div>
@@ -184,7 +184,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
       borderRadius: '8px', 
       padding: '16px' 
     }}>
-      <h3>Results</h3>
+      <h3 style={{ color: '#333', margin: '0 0 16px 0' }}>Results</h3>
       
       {error && (
         <div style={{ 
@@ -229,7 +229,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
         <>
           {/* Speed and Feed Results */}
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Speed & Feed</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Speed & Feed</h4>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
@@ -244,7 +244,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
           
           {/* Chipload Results */}
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Chipload</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Chipload</h4>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
@@ -257,7 +257,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
           
           {/* Engagement Results */}
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Engagement</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Engagement</h4>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
@@ -271,7 +271,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
           
           {/* Power and Force Results */}
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Power & Force</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Power & Force</h4>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
@@ -285,7 +285,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
           
           {/* Deflection Results */}
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Tool Deflection</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Tool Deflection</h4>
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
@@ -298,7 +298,7 @@ export function ResultsSection({ results, isCalculating, error }: ResultsSection
           
           {/* Tool Information */}
           <div style={{ marginBottom: '16px' }}>
-            <h4 style={{ margin: '0 0 12px 0' }}>Tool Information</h4>
+            <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Tool Information</h4>
             <div style={{ fontSize: '14px', color: '#666' }}>
               <div>Tool Type: <strong>{results.toolType}</strong></div>
               <div>User DOC Override: <strong>{results.user_doc_override ? 'Yes' : 'No'}</strong></div>

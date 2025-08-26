@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 
 import { safeParseInputs } from '../core/data/schemas/inputs.js'
-import { calculate } from '../core/index.js'
+import { calculate, calculateWithToolConfig } from '../core/index.js'
+import { validateToolConfiguration } from '../core/utils/toolConfiguration.js'
 
 import { useCalculatorStore } from './index.js'
 
@@ -18,7 +19,10 @@ export function useCalculation() {
   // Track previous inputs to detect changes
   const prevInputsRef = useRef<string | undefined>(undefined)
   
-  const performCalculation = (inputs: ReturnType<typeof store.getInputs>) => {
+  const performCalculation = (
+    inputs: ReturnType<typeof store.getInputs>,
+    toolConfig: ReturnType<typeof store.getToolConfig>
+  ) => {
     try {
       // Validate inputs first
       const parseResult = safeParseInputs(inputs)
@@ -38,23 +42,19 @@ export function useCalculation() {
         return
       }
       
+      // Validate tool configuration
+      const toolValidation = validateToolConfiguration(toolConfig)
+      if (!toolValidation.isValid) {
+        // Missing tool configuration - don't calculate yet
+        return
+      }
+      
       store.setCalculating(true)
       store.setError(undefined)
       
-      // Perform the calculation
-      // Note: calculate() is currently a placeholder that throws an error
-      // For now, we'll catch this and show a message indicating it's not implemented
-      try {
-        const results = calculate()
-        store.setResults(results)
-      } catch (error) {
-        // Expected error since calculate() is not implemented yet
-        if (error instanceof Error && error.message.includes('not yet implemented')) {
-          store.setError('Calculation engine not yet implemented - coming in future iterations')
-        } else {
-          throw error // Re-throw unexpected errors
-        }
-      }
+      // Perform the calculation using configurable tool parameters
+      const results = calculateWithToolConfig(validatedInputs, toolConfig)
+      store.setResults(results)
       
     } catch (error) {
       console.error('Calculation error:', error)
@@ -65,16 +65,17 @@ export function useCalculation() {
   }
   
   useEffect(() => {
-    // Get current inputs and serialize them to detect changes
+    // Get current inputs and tool config, serialize them to detect changes
     const currentInputs = store.getInputs()
-    const currentInputsStr = JSON.stringify(currentInputs)
+    const currentToolConfig = store.getToolConfig()
+    const currentStateStr = JSON.stringify({ inputs: currentInputs, toolConfig: currentToolConfig })
     
-    // Only proceed if inputs have changed
-    if (prevInputsRef.current === currentInputsStr) {
+    // Only proceed if state has changed
+    if (prevInputsRef.current === currentStateStr) {
       return
     }
     
-    prevInputsRef.current = currentInputsStr
+    prevInputsRef.current = currentStateStr
     
     // Clear any existing debounce timer
     if (debounceRef.current) {
@@ -86,7 +87,7 @@ export function useCalculation() {
     
     // Set up debounced calculation
     debounceRef.current = setTimeout(() => {
-      performCalculation(currentInputs)
+      performCalculation(currentInputs, currentToolConfig)
     }, calculationDebounceMs)
     
     // Cleanup function
@@ -97,6 +98,7 @@ export function useCalculation() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    // Input dependencies
     store.machineId,
     store.spindleId, 
     store.toolId,
@@ -106,7 +108,18 @@ export function useCalculation() {
     store.user_doc_mm,
     store.user_woc_mm,
     store.override_flutes,
-    store.override_stickout_mm
+    store.override_stickout_mm,
+    // Tool configuration dependencies
+    store.toolType,
+    store.toolDiameter,
+    store.toolFlutes,
+    store.toolStickout,
+    store.toolMaterial,
+    store.toolCoating,
+    store.vbitAngle,
+    store.bodyDiameter,
+    store.defaultDoc,
+    store.defaultWoc
   ])
   
   return {

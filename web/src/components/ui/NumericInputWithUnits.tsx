@@ -56,7 +56,7 @@ export function NumericInputWithUnits({
           display: 'block', 
           marginBottom: '4px', 
           fontWeight: 'bold',
-          color: error ? '#dc2626' : 'inherit'
+          color: error ? '#dc2626' : '#333'
         }}
       >
         {label}
@@ -82,6 +82,8 @@ export function NumericInputWithUnits({
             paddingRight: unit ? '40px' : '8px',
             border: `1px solid ${error ? '#dc2626' : warning ? '#f59e0b' : '#ddd'}`,
             borderRadius: '4px',
+            backgroundColor: 'white',
+            color: '#333',
             fontSize: '14px'
           }}
         />

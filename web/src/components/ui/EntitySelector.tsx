@@ -39,7 +39,7 @@ export function EntitySelector({
           display: 'block', 
           marginBottom: '4px', 
           fontWeight: 'bold',
-          color: error ? '#dc2626' : 'inherit'
+          color: error ? '#dc2626' : '#333'
         }}
       >
         {label}
@@ -58,6 +58,7 @@ export function EntitySelector({
           border: `1px solid ${error ? '#dc2626' : '#ddd'}`,
           borderRadius: '4px',
           backgroundColor: 'white',
+          color: '#333',
           fontSize: '14px',
           cursor: 'pointer'
         }}

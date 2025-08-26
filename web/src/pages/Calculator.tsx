@@ -18,7 +18,7 @@ export default function Calculator() {
   
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <h2>CNC Calculator</h2>
+      <h2 style={{ color: '#333', margin: '0 0 16px 0' }}>CNC Calculator</h2>
       <p style={{ color: '#666', marginBottom: '24px' }}>
         Enter your machine, spindle, tool, and material parameters to calculate speeds, feeds, and cutting conditions.
       </p>

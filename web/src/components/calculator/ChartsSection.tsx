@@ -31,7 +31,7 @@ export function ChartsSection() {
         borderRadius: '8px',
         border: '1px solid #e5e7eb'
       }}>
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 'bold' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
           What-If Analysis Charts
         </h3>
         <p style={{ margin: 0, fontSize: '14px' }}>
@@ -53,7 +53,7 @@ export function ChartsSection() {
         margin: '0 0 16px 0', 
         fontSize: '18px', 
         fontWeight: 'bold',
-        color: '#1f2937'
+        color: '#333'
       }}>
         What-If Analysis Charts
       </h3>
@@ -76,7 +76,7 @@ export function ChartsSection() {
             margin: '0 0 16px 0', 
             fontSize: '16px', 
             fontWeight: '600',
-            color: '#374151'
+            color: '#333'
           }}>
             Spindle Power Curve
           </h4>
@@ -106,7 +106,7 @@ export function ChartsSection() {
             margin: '0 0 16px 0', 
             fontSize: '16px', 
             fontWeight: '600',
-            color: '#374151'
+            color: '#333'
           }}>
             Tool Deflection Analysis
           </h4>

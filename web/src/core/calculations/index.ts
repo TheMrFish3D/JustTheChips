@@ -20,6 +20,7 @@ export {
   getChiploadRange,
   getCoatingFactor,
   getToolChiploadFactor,
+  getToolMaterialChiploadFactor,
   type ChiploadCalculationResult,
   type ChiploadCalculationWarning
 } from './chipload.js'
@@ -45,6 +46,7 @@ export {
 export {
   calculateCuttingForce,
   getToolForceMultiplier,
+  getToolMaterialForceMultiplier,
   type ForceCalculationResult,
   type ForceCalculationWarning
 } from './force.js'
@@ -55,6 +57,7 @@ export {
   calculateStaticDeflection,
   calculateDynamicAmplification,
   getYoungsModulus,
+  getToolDensity,
   estimateToolMass,
   suggestToolsForTargetDeflection,
   optimizeToolConfiguration,
