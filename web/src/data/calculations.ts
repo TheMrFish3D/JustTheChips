@@ -100,8 +100,8 @@ export class MachiningCalculator {
     // Calculate feed rate
     const feedRate = this.calculateFeedRate(rpm, toolConfig.flutes, chipLoad)
     
-    // Calculate cutting depths based on operation and tool
-    const { depthOfCut, stepover } = this.calculateCuttingDepths(toolConfig, operation)
+    // Calculate cutting depths based on operation, tool, and material
+    const { depthOfCut, stepover } = this.calculateCuttingDepths(toolConfig, operation, material)
     
     // Calculate material removal rate
     const materialRemovalRate = this.calculateMRR(feedRate, depthOfCut, stepover)
@@ -267,49 +267,141 @@ export class MachiningCalculator {
   }
 
   /**
-   * Calculate appropriate depth of cut and stepover based on operation
+   * Calculate appropriate depth of cut and stepover based on operation, material, and tool properties
    */
-  private calculateCuttingDepths(toolConfig: ToolConfig, operation: OperationConfig): { depthOfCut: number, stepover: number } {
+  private calculateCuttingDepths(toolConfig: ToolConfig, operation: OperationConfig, material?: MaterialProperties): { depthOfCut: number, stepover: number } {
     const diameter = toolConfig.diameter
     let depthOfCut: number
     let stepover: number
 
-    // Base depth and stepover as percentage of tool diameter
+    // More aggressive base depth and stepover values based on industry standards
     switch (operation.type) {
       case 'slotting':
-        depthOfCut = diameter * 0.2  // 20% of diameter
+        depthOfCut = diameter * (operation.finish === 'roughing' ? 0.4 : 0.15)  // 40% roughing, 15% finishing
         stepover = diameter * 1.0    // Full diameter for slotting
         break
       case 'pocketing':
       case 'adaptive':
-        depthOfCut = diameter * 0.15 // 15% of diameter
-        stepover = diameter * 0.4    // 40% stepover for pocketing
+        depthOfCut = diameter * (operation.finish === 'roughing' ? 0.3 : 0.12)  // 30% roughing, 12% finishing
+        stepover = diameter * (operation.finish === 'roughing' ? 0.5 : 0.3)     // Adaptive stepover
         break
       case 'facing':
       case 'contour':
-        depthOfCut = diameter * 0.05 // 5% of diameter for finishing
-        stepover = diameter * 0.1    // 10% stepover
+        depthOfCut = diameter * (operation.finish === 'roughing' ? 0.25 : 0.08) // 25% roughing, 8% finishing
+        stepover = diameter * (operation.finish === 'roughing' ? 0.15 : 0.08)   // Conservative stepover
         break
       case 'drilling':
-        depthOfCut = diameter * 0.5  // 50% for drilling pecks
+        depthOfCut = diameter * 0.75 // 75% for drilling pecks (more aggressive)
         stepover = 0                 // No stepover for drilling
         break
       case 'threading':
-        depthOfCut = diameter * 0.05 // Light cuts for threading
+        depthOfCut = diameter * 0.08 // Light cuts for threading
         stepover = diameter * 0.1
         break
       default:
-        depthOfCut = diameter * 0.1
-        stepover = diameter * 0.3
+        depthOfCut = diameter * (operation.finish === 'roughing' ? 0.2 : 0.08)
+        stepover = diameter * (operation.finish === 'roughing' ? 0.4 : 0.2)
     }
 
-    // Adjust for finishing vs roughing
-    if (operation.finish === 'finishing') {
-      depthOfCut *= 0.5  // Half depth for finishing
-      stepover *= 0.5    // Smaller stepover for better finish
+    // Apply material-based adjustments if material is provided
+    if (material) {
+      const materialFactor = this.getMaterialDepthFactor(material)
+      depthOfCut *= materialFactor
     }
+
+    // Apply tool material and coating factors
+    const toolFactor = this.getToolDepthFactor(toolConfig)
+    depthOfCut *= toolFactor
+
+    // Apply stickout penalty for tool deflection
+    const stickoutFactor = this.getStickoutDepthFactor(toolConfig)
+    depthOfCut *= stickoutFactor
+
+    // Ensure minimum depth of cut (0.01mm or 0.0004")
+    const minDepth = this.units === 'metric' ? 0.01 : 0.0004
+    depthOfCut = Math.max(depthOfCut, minDepth)
 
     return { depthOfCut, stepover }
+  }
+
+  /**
+   * Calculate material-based depth of cut modifier
+   * Uses machinability rating: higher rating = more aggressive cuts possible
+   */
+  private getMaterialDepthFactor(material: MaterialProperties): number {
+    // Scale from 0.5 (hardest materials) to 1.5 (easiest materials)
+    // machinabilityRating is 1-10 scale where 10 = easiest
+    const baseFactor = 0.5 + (material.machinabilityRating - 1) * 0.1
+    
+    // Additional adjustment for work hardening materials
+    const workHardeningPenalty = 1.0 / material.workHardening
+    
+    return baseFactor * workHardeningPenalty
+  }
+
+  /**
+   * Calculate tool material and coating depth of cut modifier
+   */
+  private getToolDepthFactor(toolConfig: ToolConfig): number {
+    let materialFactor = 1.0
+    let coatingFactor = 1.0
+
+    // Tool material factors
+    switch (toolConfig.material) {
+      case 'carbide':
+        materialFactor = 1.3  // Carbide can handle more aggressive cuts
+        break
+      case 'ceramic':
+        materialFactor = 1.5  // Ceramic very aggressive but brittle
+        break
+      case 'diamond':
+        materialFactor = 1.4  // Diamond excellent for non-ferrous
+        break
+      case 'hss':
+        materialFactor = 0.8  // HSS more conservative
+        break
+    }
+
+    // Coating factors
+    switch (toolConfig.coating) {
+      case 'tin':
+        coatingFactor = 1.1
+        break
+      case 'ticn':
+        coatingFactor = 1.15
+        break
+      case 'tialn':
+        coatingFactor = 1.2
+        break
+      case 'dlc':
+        coatingFactor = 1.25
+        break
+      case 'diamond':
+        coatingFactor = 1.3
+        break
+      default: // uncoated
+        coatingFactor = 1.0
+    }
+
+    return materialFactor * coatingFactor
+  }
+
+  /**
+   * Calculate stickout-based depth of cut modifier
+   * Longer stickout = reduced depth due to deflection concerns
+   */
+  private getStickoutDepthFactor(toolConfig: ToolConfig): number {
+    const stickoutRatio = toolConfig.stickout / toolConfig.diameter
+    
+    if (stickoutRatio <= 3) {
+      return 1.0    // No penalty for short stickout
+    } else if (stickoutRatio <= 5) {
+      return 0.8    // 20% reduction for moderate stickout
+    } else if (stickoutRatio <= 8) {
+      return 0.6    // 40% reduction for long stickout
+    } else {
+      return 0.4    // 60% reduction for very long stickout
+    }
   }
 
   /**
