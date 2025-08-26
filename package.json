@@ -1,0 +1,14 @@
+{
+  "name": "just-the-chips",
+  "version": "1.0.0",
+  "description": "A simple web-based feeds and speeds calculator for CNC machining",
+  "scripts": {
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "preview": "cd web && npm run preview",
+    "lint": "cd web && npm run lint"
+  },
+  "keywords": ["cnc", "machining", "feeds", "speeds", "calculator"],
+  "author": "TheMrFish3D",
+  "license": "MIT"
+}
