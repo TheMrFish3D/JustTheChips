@@ -12,7 +12,7 @@ export function LeftSidebar() {
   const { getFieldError } = useInputValidation()
   const [showMachineConfig, setShowMachineConfig] = useState(false)
   
-  // Create user-friendly labels for machines
+  // Create user-friendly labels and descriptions for machines
   const getMachineLabel = (id: string): string => {
     const labels = new Map([
       ['3018_basic', '3018 Basic'],
@@ -28,6 +28,20 @@ export function LeftSidebar() {
       ['custom', 'Custom']
     ])
     return labels.get(id) || id
+  }
+
+  const getMachineDescription = (machine: typeof machines[0]): string => {
+    const descriptions = new Map([
+      ['3018_cnc', `Very light duty - Rigidity: ${machine.rigidity_factor} - PCB/engraving only`],
+      ['lowrider_v3', `Light duty - Rigidity: ${machine.rigidity_factor} - Wood/plastics, light aluminum`],
+      ['queenbee_pro', `Light-medium duty - Rigidity: ${machine.rigidity_factor} - Aluminum capable`],
+      ['printnc', `Medium duty - Rigidity: ${machine.rigidity_factor} - Steel capable hobby machine`],
+      ['benchtop_mill', `Medium duty - Rigidity: ${machine.rigidity_factor} - Traditional mill design`],
+      ['rigid_hobby_mill', `Medium-heavy duty - Rigidity: ${machine.rigidity_factor} - High-end hobby`],
+      ['entry_vmc', `Industrial entry - Rigidity: ${machine.rigidity_factor} - Full capability`],
+      ['custom', `Custom configuration - Rigidity: ${machine.rigidity_factor} - User defined`]
+    ])
+    return descriptions.get(machine.id) || `Max feed: ${machine.axis_max_feed_mm_min} mm/min, Rigidity: ${machine.rigidity_factor}`
   }
 
   // Create user-friendly labels for spindles  
@@ -47,7 +61,7 @@ export function LeftSidebar() {
   const machineOptions = machines.map(machine => ({
     id: machine.id,
     label: getMachineLabel(machine.id),
-    description: `Max feed: ${machine.axis_max_feed_mm_min} mm/min, Rigidity: ${machine.rigidity_factor}`
+    description: getMachineDescription(machine)
   }))
   
   const spindleOptions = spindles.map(spindle => ({
