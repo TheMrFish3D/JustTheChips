@@ -50,7 +50,7 @@ export interface CalculationResult {
   warnings: string[]
   // Additional useful calculations
   chipThickness: number      // mm or inches - actual chip thickness
-  toolDeflection: number     // mm or inches - estimated tool deflection  
+  toolDeflection: number     // mm or inches - total tool deflection  
   surfaceFinish: number      // Ra in micrometers or microinches
   toolLife: number           // estimated minutes of tool life
   machiningTime: number      // minutes to complete operation
@@ -58,6 +58,27 @@ export interface CalculationResult {
   chatterFrequency: number   // Hz - critical frequency for chatter
   costPerPart: number        // estimated cost in currency units
   optimization: string[]     // optimization recommendations
+  // Comprehensive deflection analysis
+  deflectionAnalysis: {
+    lateralDeflection: number    // mm or inches - lateral beam deflection
+    torsionalDeflection: number  // mm or inches - torsional deflection converted to linear
+    staticDeflection: number     // mm or inches - combined static deflection
+    totalDeflection: number      // mm or inches - including dynamic effects
+    dynamicFactor: number        // amplification factor for dynamic effects
+    naturalFrequency: number     // Hz - tool natural frequency
+    effectiveDiameter: number    // mm or inches - considering flute depth
+    limitingFactor: string       // what limits maximum depth of cut
+  }
+  // Maximum depth of cut analysis
+  maxDepthAnalysis: {
+    powerLimit: number           // mm or inches - power-limited max depth
+    deflectionLimit: number      // mm or inches - deflection-limited max depth
+    strengthLimit: number        // mm or inches - tool strength-limited max depth
+    stabilityLimit: number       // mm or inches - chatter stability-limited max depth
+    rigidityLimit: number        // mm or inches - machine rigidity-limited max depth
+    overallLimit: number         // mm or inches - most restrictive limit
+    limitingFactor: string       // which factor is most restrictive
+  }
 }
 
 export class MachiningCalculator {
@@ -123,9 +144,14 @@ export class MachiningCalculator {
       warnings.push('High cutting forces detected - consider lighter cuts')
     }
 
+    // Calculate comprehensive deflection analysis
+    const deflectionAnalysis = this.calculateComprehensiveDeflection(toolConfig, cuttingForce)
+    
+    // Calculate maximum depth of cut analysis
+    const maxDepthAnalysis = this.calculateMaximumDepthOfCut(toolConfig, operation, material)
+
     // Calculate additional useful parameters
     const chipThickness = this.calculateChipThickness(chipLoad)
-    const toolDeflection = this.calculateToolDeflection(toolConfig, cuttingForce)
     const surfaceFinish = this.calculateSurfaceFinish(feedRate, rpm, toolConfig)
     const toolLife = this.calculateToolLife(material, toolConfig, rpm)
     const machiningTime = this.calculateMachiningTime(operation, materialRemovalRate)
@@ -133,12 +159,20 @@ export class MachiningCalculator {
     const chatterFrequency = this.calculateChatterFrequency(toolConfig, machineConfig)
     const costPerPart = this.calculateCostPerPart(toolLife, machiningTime, material)
     const optimization = this.generateOptimizationRecommendations(
-      material, toolConfig, operation, spindlePower, cuttingForce, toolDeflection
+      material, toolConfig, operation, spindlePower, cuttingForce, deflectionAnalysis.totalDeflection
     )
 
-    // Add additional warnings based on new calculations
-    if (toolDeflection > (this.units === 'metric' ? 0.05 : 0.002)) {
+    // Add additional warnings based on comprehensive analysis
+    if (deflectionAnalysis.totalDeflection > (this.units === 'metric' ? 0.05 : 0.002)) {
       warnings.push('Excessive tool deflection - reduce overhang or cutting forces')
+    }
+    
+    if (deflectionAnalysis.dynamicFactor > 2.0) {
+      warnings.push('High dynamic amplification - consider avoiding resonance speeds')
+    }
+    
+    if (depthOfCut >= maxDepthAnalysis.overallLimit * 0.9) {
+      warnings.push(`Depth of cut near maximum limit (${maxDepthAnalysis.limitingFactor} constrained)`)
     }
     
     if (heatGeneration > 200) {
@@ -160,14 +194,35 @@ export class MachiningCalculator {
       warnings,
       // Additional calculations
       chipThickness: Math.round(chipThickness * 10000) / 10000,
-      toolDeflection: Math.round(toolDeflection * 10000) / 10000,
+      toolDeflection: Math.round(deflectionAnalysis.totalDeflection * 10000) / 10000,
       surfaceFinish: Math.round(surfaceFinish * 100) / 100,
       toolLife: Math.round(toolLife),
       machiningTime: Math.round(machiningTime * 10) / 10,
       heatGeneration: Math.round(heatGeneration),
       chatterFrequency: Math.round(chatterFrequency),
       costPerPart: Math.round(costPerPart * 100) / 100,
-      optimization
+      optimization,
+      // Comprehensive deflection analysis
+      deflectionAnalysis: {
+        lateralDeflection: Math.round(deflectionAnalysis.lateralDeflection * 10000) / 10000,
+        torsionalDeflection: Math.round(deflectionAnalysis.torsionalDeflection * 10000) / 10000,
+        staticDeflection: Math.round(deflectionAnalysis.staticDeflection * 10000) / 10000,
+        totalDeflection: Math.round(deflectionAnalysis.totalDeflection * 10000) / 10000,
+        dynamicFactor: Math.round(deflectionAnalysis.dynamicFactor * 100) / 100,
+        naturalFrequency: Math.round(deflectionAnalysis.naturalFrequency),
+        effectiveDiameter: Math.round(deflectionAnalysis.effectiveDiameter * 100) / 100,
+        limitingFactor: 'analysis' // Will be set by comprehensive analysis
+      },
+      // Maximum depth of cut analysis
+      maxDepthAnalysis: {
+        powerLimit: Math.round(maxDepthAnalysis.powerLimit * 100) / 100,
+        deflectionLimit: Math.round(maxDepthAnalysis.deflectionLimit * 100) / 100,
+        strengthLimit: Math.round(maxDepthAnalysis.strengthLimit * 100) / 100,
+        stabilityLimit: Math.round(maxDepthAnalysis.stabilityLimit * 100) / 100,
+        rigidityLimit: Math.round(maxDepthAnalysis.rigidityLimit * 100) / 100,
+        overallLimit: Math.round(maxDepthAnalysis.overallLimit * 100) / 100,
+        limitingFactor: maxDepthAnalysis.limitingFactor
+      }
     }
   }
 
@@ -317,11 +372,279 @@ export class MachiningCalculator {
     const stickoutFactor = this.getStickoutDepthFactor(toolConfig)
     depthOfCut *= stickoutFactor
 
+    // Calculate maximum depth based on multiple constraints
+    const maxDepthLimits = this.calculateMaximumDepthOfCut(toolConfig, operation, material)
+    
+    // Apply the most restrictive limit
+    depthOfCut = Math.min(depthOfCut, maxDepthLimits.overallLimit)
+
     // Ensure minimum depth of cut (0.01mm or 0.0004")
     const minDepth = this.units === 'metric' ? 0.01 : 0.0004
     depthOfCut = Math.max(depthOfCut, minDepth)
 
     return { depthOfCut, stepover }
+  }
+
+  /**
+   * Calculate maximum depth of cut based on multiple engineering constraints
+   */
+  private calculateMaximumDepthOfCut(
+    toolConfig: ToolConfig, 
+    operation: OperationConfig, 
+    material?: MaterialProperties
+  ) {
+    const diameter = toolConfig.diameter
+    
+    // 1. Power-limited depth of cut
+    const powerLimit = this.calculatePowerLimitedDepth(toolConfig, operation, material)
+    
+    // 2. Deflection-limited depth of cut
+    const deflectionLimit = this.calculateDeflectionLimitedDepth(toolConfig, operation)
+    
+    // 3. Tool strength-limited depth of cut
+    const strengthLimit = this.calculateStrengthLimitedDepth(toolConfig, operation)
+    
+    // 4. Stability-limited depth of cut (chatter avoidance)
+    const stabilityLimit = this.calculateStabilityLimitedDepth(toolConfig, operation, material)
+    
+    // 5. Machine rigidity consideration (future enhancement)
+    const rigidityLimit = diameter * 0.5 // Conservative assumption for now
+    
+    // Apply safety factors
+    const safetyFactor = this.getSafetyFactor(operation)
+    
+    const powerLimitSafe = powerLimit / safetyFactor
+    const deflectionLimitSafe = deflectionLimit / safetyFactor
+    const strengthLimitSafe = strengthLimit / safetyFactor
+    const stabilityLimitSafe = stabilityLimit / safetyFactor
+    
+    // Overall limit is the most restrictive
+    const overallLimit = Math.min(
+      powerLimitSafe,
+      deflectionLimitSafe, 
+      strengthLimitSafe,
+      stabilityLimitSafe,
+      rigidityLimit
+    )
+    
+    return {
+      powerLimit: powerLimitSafe,
+      deflectionLimit: deflectionLimitSafe,
+      strengthLimit: strengthLimitSafe,
+      stabilityLimit: stabilityLimitSafe,
+      rigidityLimit,
+      overallLimit,
+      limitingFactor: this.identifyLimitingFactor({
+        power: powerLimitSafe,
+        deflection: deflectionLimitSafe,
+        strength: strengthLimitSafe,
+        stability: stabilityLimitSafe,
+        rigidity: rigidityLimit
+      })
+    }
+  }
+
+  /**
+   * Calculate power-limited maximum depth of cut
+   * Based on available spindle power and machining efficiency
+   */
+  private calculatePowerLimitedDepth(
+    toolConfig: ToolConfig,
+    _operation: OperationConfig,
+    material?: MaterialProperties
+  ): number {
+    // For now, use a conservative approach
+    // This will be enhanced when machine config is available in context
+    const diameter = toolConfig.diameter
+    
+    // Estimate power requirement based on material and operation
+    let specificPowerEstimate = 2.0 // kW per cm³/min for moderate materials
+    
+    if (material) {
+      switch (material.category) {
+        case 'Wood':
+          specificPowerEstimate = 0.2
+          break
+        case 'Plastic':
+          specificPowerEstimate = 0.5
+          break
+        case 'Aluminum':
+          specificPowerEstimate = 1.5
+          break
+        case 'Steel':
+          specificPowerEstimate = 3.0
+          break
+        case 'Copper Alloy':
+          specificPowerEstimate = 1.2
+          break
+        default:
+          specificPowerEstimate = 2.0
+      }
+    }
+    
+    // Assume typical machine power (will be improved with actual machine config)
+    const typicalPower = Math.max(3.0, diameter * 0.5) // Scale with tool size
+    const usablePower = typicalPower * 0.8 // 80% power utilization limit
+    
+    // Power-limited depth calculation
+    // P = MRR × specific_power, MRR = feed × depth × stepover
+    // Assuming moderate feed and stepover for this calculation
+    const assumedFeedRate = 1000 // mm/min
+    const assumedStepover = diameter * 0.3
+    
+    const maxMRR = usablePower / specificPowerEstimate
+    const powerLimitedDepth = (maxMRR * 1000) / (assumedFeedRate * assumedStepover)
+    
+    return Math.min(powerLimitedDepth, diameter * 0.8) // Cap at 80% of diameter
+  }
+
+  /**
+   * Calculate deflection-limited maximum depth of cut
+   * Based on acceptable deflection tolerances
+   */
+  private calculateDeflectionLimitedDepth(
+    toolConfig: ToolConfig,
+    operation: OperationConfig
+  ): number {
+    // Define acceptable deflection limits based on operation type
+    let maxAcceptableDeflection: number
+    
+    if (operation.finish === 'finishing') {
+      maxAcceptableDeflection = this.units === 'metric' ? 0.005 : 0.0002 // High precision
+    } else {
+      maxAcceptableDeflection = this.units === 'metric' ? 0.02 : 0.0008 // General machining
+    }
+    
+    // Use iterative approach to find maximum depth that keeps deflection within limits
+    const diameter = toolConfig.diameter
+    let testDepth = diameter * 0.1 // Start conservative
+    const increment = diameter * 0.01
+    let maxSafeDepth = testDepth
+    
+    // Estimate cutting force coefficient
+    const forceCoefficient = 800 // N/mm² typical for moderate materials
+    
+    for (let depth = testDepth; depth <= diameter; depth += increment) {
+      // Estimate cutting force for this depth
+      const estimatedForce = forceCoefficient * depth * (diameter * 0.1) // Simplified
+      
+      // Calculate deflection
+      const deflection = this.calculateLateralDeflection(
+        estimatedForce,
+        toolConfig.stickout,
+        this.getEffectiveToolDiameter(toolConfig),
+        this.getToolMaterialProperties(toolConfig.material).elasticModulus
+      )
+      
+      if (deflection <= maxAcceptableDeflection) {
+        maxSafeDepth = depth
+      } else {
+        break
+      }
+    }
+    
+    return maxSafeDepth
+  }
+
+  /**
+   * Calculate tool strength-limited maximum depth of cut
+   * Based on tool material ultimate strength and stress concentration
+   */
+  private calculateStrengthLimitedDepth(
+    toolConfig: ToolConfig,
+    _operation: OperationConfig
+  ): number {
+    const diameter = toolConfig.diameter
+    const materialProps = this.getToolMaterialProperties(toolConfig.material)
+    
+    // Calculate minimum cross-sectional area (at flute root)
+    const effectiveDiameter = this.getEffectiveToolDiameter(toolConfig)
+    const minArea = Math.PI * Math.pow(effectiveDiameter, 2) / 4
+    
+    // Maximum allowable force based on material strength
+    // Apply stress concentration factor for fluted tools
+    const stressConcentrationFactor = 1.5 + (toolConfig.flutes - 2) * 0.1
+    const maxAllowableStress = materialProps.tensileStrength / (3.0 * stressConcentrationFactor) // Safety factor of 3
+    const maxAllowableForce = maxAllowableStress * minArea
+    
+    // Convert force limit to depth limit
+    // F = Kc × a × fz × D (simplified cutting force model)
+    const assumedKc = 800 // N/mm² cutting force coefficient
+    const assumedFeedPerTooth = 0.05 // mm conservative
+    
+    const strengthLimitedDepth = maxAllowableForce / (assumedKc * assumedFeedPerTooth * diameter)
+    
+    return Math.min(strengthLimitedDepth, diameter * 0.6) // Cap at 60% of diameter
+  }
+
+  /**
+   * Calculate chatter stability-limited maximum depth of cut
+   * Based on simplified stability lobe theory
+   */
+  private calculateStabilityLimitedDepth(
+    toolConfig: ToolConfig,
+    _operation: OperationConfig,
+    material?: MaterialProperties
+  ): number {
+    const diameter = toolConfig.diameter
+    
+    // const materialProps = this.getToolMaterialProperties(toolConfig.material)
+    // const naturalFreq = this.calculateNaturalFrequency(toolConfig, materialProps)
+    
+    // Simplified stability limit calculation
+    // This is a conservative approximation - full stability analysis requires
+    // detailed modal analysis and cutting force coefficients
+    
+    const stickoutRatio = toolConfig.stickout / diameter
+    let stabilityFactor = 1.0
+    
+    if (stickoutRatio > 3) {
+      stabilityFactor = 0.5 / Math.pow(stickoutRatio / 3, 1.5)
+    }
+    
+    // Material-based cutting force coefficient
+    let cuttingForceCoeff = 800 // Default N/mm²
+    if (material) {
+      cuttingForceCoeff = material.specificCuttingForce
+    }
+    
+    // Simplified stability limit
+    const baseStabilityDepth = diameter * 0.2 // Conservative base
+    const stabilityLimitedDepth = baseStabilityDepth * stabilityFactor * (1000 / cuttingForceCoeff)
+    
+    return Math.max(stabilityLimitedDepth, diameter * 0.05) // Minimum 5% of diameter
+  }
+
+  /**
+   * Get safety factor based on operation type and criticality
+   */
+  private getSafetyFactor(operation: OperationConfig): number {
+    if (operation.finish === 'finishing') {
+      return 2.5 // Higher safety for finishing operations
+    } else {
+      return 2.0 // Standard safety for roughing
+    }
+  }
+
+  /**
+   * Identify which factor is limiting the maximum depth of cut
+   */
+  private identifyLimitingFactor(limits: {
+    power: number
+    deflection: number
+    strength: number
+    stability: number
+    rigidity: number
+  }): string {
+    const minValue = Math.min(...Object.values(limits))
+    
+    for (const [factor, value] of Object.entries(limits)) {
+      if (Math.abs(value - minValue) < 0.001) {
+        return factor
+      }
+    }
+    
+    return 'unknown'
   }
 
   /**
@@ -489,51 +812,238 @@ export class MachiningCalculator {
   }
 
   /**
-   * Calculate tool deflection based on cutting forces and tool geometry
-   * Uses beam deflection formula for cantilever beam
+   * Comprehensive tool deflection analysis
+   * Based on cantilever beam mechanics with multiple failure modes
    */
-  private calculateToolDeflection(toolConfig: ToolConfig, cuttingForce: number): number {
-    // Deflection = (F × L³) / (3 × E × I)
-    // Where: F = force, L = length, E = elastic modulus, I = moment of inertia
-    
-    const diameter = toolConfig.diameter
+  private calculateComprehensiveDeflection(toolConfig: ToolConfig, cuttingForce: number) {
     const length = toolConfig.stickout
     
-    // Material properties for tool materials
-    let elasticModulus: number // GPa or Mpsi
-    switch (toolConfig.material) {
-      case 'hss':
-        elasticModulus = this.units === 'metric' ? 200 : 29 // GPa or Mpsi
-        break
-      case 'carbide':
-        elasticModulus = this.units === 'metric' ? 630 : 91
-        break
-      case 'ceramic':
-        elasticModulus = this.units === 'metric' ? 400 : 58
-        break
-      case 'diamond':
-        elasticModulus = this.units === 'metric' ? 1000 : 145
-        break
-      default:
-        elasticModulus = this.units === 'metric' ? 200 : 29
+    // Tool material properties based on comprehensive research
+    const materialProps = this.getToolMaterialProperties(toolConfig.material)
+    
+    // Calculate effective diameter considering flute depth
+    const effectiveDiameter = this.getEffectiveToolDiameter(toolConfig)
+    
+    // Calculate different deflection modes
+    const lateralDeflection = this.calculateLateralDeflection(
+      cuttingForce, length, effectiveDiameter, materialProps.elasticModulus
+    )
+    
+    const torsionalDeflection = this.calculateTorsionalDeflection(
+      toolConfig, materialProps.shearModulus
+    )
+    
+    const dynamicFactor = this.getDynamicAmplificationFactor(toolConfig, materialProps)
+    
+    // Combined deflection with safety factors
+    const staticDeflection = Math.sqrt(
+      Math.pow(lateralDeflection, 2) + Math.pow(torsionalDeflection, 2)
+    )
+    
+    const totalDeflection = staticDeflection * dynamicFactor
+    
+    return {
+      lateralDeflection,
+      torsionalDeflection, 
+      staticDeflection,
+      totalDeflection,
+      dynamicFactor,
+      naturalFrequency: this.calculateNaturalFrequency(toolConfig, materialProps),
+      effectiveDiameter,
+      materialProps
+    }
+  }
+
+  /**
+   * Get comprehensive material properties for tool materials
+   */
+  private getToolMaterialProperties(material: string) {
+    const props = {
+      hss: {
+        elasticModulus: this.units === 'metric' ? 215000 : 31.2, // N/mm² or psi
+        shearModulus: this.units === 'metric' ? 85000 : 12.3,
+        density: this.units === 'metric' ? 8.2e-6 : 0.000296, // kg/mm³ or lb/in³
+        tensileStrength: this.units === 'metric' ? 2400 : 348000 // N/mm² or psi
+      },
+      carbide: {
+        elasticModulus: this.units === 'metric' ? 640000 : 92.8,
+        shearModulus: this.units === 'metric' ? 256000 : 37.1,
+        density: this.units === 'metric' ? 14.5e-6 : 0.000524,
+        tensileStrength: this.units === 'metric' ? 1500 : 217500
+      },
+      ceramic: {
+        elasticModulus: this.units === 'metric' ? 400000 : 58.0,
+        shearModulus: this.units === 'metric' ? 160000 : 23.2,
+        density: this.units === 'metric' ? 4.0e-6 : 0.000145,
+        tensileStrength: this.units === 'metric' ? 800 : 116000
+      },
+      diamond: {
+        elasticModulus: this.units === 'metric' ? 1100000 : 159.5,
+        shearModulus: this.units === 'metric' ? 450000 : 65.3,
+        density: this.units === 'metric' ? 3.5e-6 : 0.000126,
+        tensileStrength: this.units === 'metric' ? 1200 : 174000
+      }
     }
     
+    return props[material as keyof typeof props] || props.hss
+  }
+
+  /**
+   * Calculate effective tool diameter considering flute geometry
+   */
+  private getEffectiveToolDiameter(toolConfig: ToolConfig): number {
+    // Flute depth reduces effective stiffness
+    const fluteDepthRatio = this.getFluteDepthRatio(toolConfig.flutes)
+    const coreRatio = 1 - fluteDepthRatio
+    
+    return toolConfig.diameter * coreRatio
+  }
+
+  /**
+   * Get flute depth ratio based on flute count
+   */
+  private getFluteDepthRatio(flutes: number): number {
+    switch (flutes) {
+      case 1: return 0.35  // Single flute - deepest
+      case 2: return 0.275 // Two flute standard
+      case 3: return 0.225 // Three flute
+      case 4: return 0.175 // Four flute
+      case 5: return 0.15  // Five flute
+      case 6: return 0.125 // Six flute - shallowest
+      default: return 0.2  // Default assumption
+    }
+  }
+
+  /**
+   * Calculate lateral deflection using cantilever beam formula
+   * δ = (F × L³) / (3 × E × I)
+   */
+  private calculateLateralDeflection(
+    force: number, 
+    length: number, 
+    diameter: number, 
+    elasticModulus: number
+  ): number {
     // Moment of inertia for circular cross-section: I = π × d⁴ / 64
     const momentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 64
     
-    // Convert units and calculate deflection
-    let deflection: number
-    if (this.units === 'metric') {
-      // Convert GPa to N/mm², mm to mm
-      elasticModulus *= 1000 // GPa to N/mm²
-      deflection = (cuttingForce * Math.pow(length, 3)) / (3 * elasticModulus * momentOfInertia)
-    } else {
-      // Imperial calculations
-      elasticModulus *= 1000000 // Mpsi to psi
-      deflection = (cuttingForce * Math.pow(length, 3)) / (3 * elasticModulus * momentOfInertia)
-    }
+    // Cantilever beam deflection formula
+    const deflection = (force * Math.pow(length, 3)) / (3 * elasticModulus * momentOfInertia)
     
     return Math.abs(deflection)
+  }
+
+  /**
+   * Calculate torsional deflection under cutting torque
+   * θ = (T × L) / (G × J), then convert to linear deflection at tool tip
+   */
+  private calculateTorsionalDeflection(toolConfig: ToolConfig, shearModulus: number): number {
+    const diameter = this.getEffectiveToolDiameter(toolConfig)
+    const length = toolConfig.stickout
+    
+    // Estimate cutting torque from tool diameter and typical forces
+    const estimatedTorque = this.estimateCuttingTorque(toolConfig)
+    
+    // Polar moment of inertia: J = π × d⁴ / 32
+    const polarMomentOfInertia = (Math.PI * Math.pow(diameter, 4)) / 32
+    
+    // Angle of twist: θ = (T × L) / (G × J)
+    const angleOfTwist = (estimatedTorque * length) / (shearModulus * polarMomentOfInertia)
+    
+    // Convert angular deflection to linear deflection at tool tip
+    const linearTorsionalDeflection = angleOfTwist * (diameter / 2)
+    
+    return Math.abs(linearTorsionalDeflection)
+  }
+
+  /**
+   * Estimate cutting torque based on tool geometry and typical cutting conditions
+   */
+  private estimateCuttingTorque(toolConfig: ToolConfig): number {
+    const radius = toolConfig.diameter / 2
+    
+    // Typical torque coefficients based on tool type and material
+    let torqueCoefficient = 0.3 // Base coefficient
+    
+    switch (toolConfig.type) {
+      case 'flat-endmill':
+        torqueCoefficient = 0.4
+        break
+      case 'ball-endmill':
+        torqueCoefficient = 0.35
+        break
+      case 'drill':
+        torqueCoefficient = 0.5
+        break
+    }
+    
+    // Estimate torque: T = F_tangential × radius
+    // Assuming moderate cutting conditions
+    const estimatedRadialForce = 100 * Math.pow(toolConfig.diameter, 1.2) // Empirical scaling
+    const torque = estimatedRadialForce * radius * torqueCoefficient
+    
+    return torque
+  }
+
+  /**
+   * Calculate natural frequency of the tool as cantilever beam
+   * f_n = (λ² / (2π)) × √(EI / (ρA × L⁴))
+   */
+  private calculateNaturalFrequency(
+    toolConfig: ToolConfig, 
+    materialProps: any
+  ): number {
+    const diameter = this.getEffectiveToolDiameter(toolConfig)
+    const length = toolConfig.stickout
+    
+    // First mode eigenvalue for cantilever beam
+    const lambda1 = 1.875
+    
+    // Cross-sectional area
+    const area = Math.PI * Math.pow(diameter, 2) / 4
+    
+    // Moment of inertia
+    const momentOfInertia = Math.PI * Math.pow(diameter, 4) / 64
+    
+    // Natural frequency calculation
+    const frequency = (Math.pow(lambda1, 2) / (2 * Math.PI)) * 
+      Math.sqrt((materialProps.elasticModulus * momentOfInertia) / 
+                (materialProps.density * area * Math.pow(length, 4)))
+    
+    return frequency
+  }
+
+  /**
+   * Calculate dynamic amplification factor for vibration effects
+   */
+  private getDynamicAmplificationFactor(toolConfig: ToolConfig, materialProps: any): number {
+    const naturalFreq = this.calculateNaturalFrequency(toolConfig, materialProps)
+    
+    // Estimate typical spindle speed for dynamic analysis
+    const typicalRpm = Math.min(20000, 150000 / toolConfig.diameter) // Empirical scaling
+    const spindleFreq = typicalRpm / 60 // Convert to Hz
+    
+    // Frequency ratio
+    const frequencyRatio = spindleFreq / naturalFreq
+    
+    // Dynamic amplification factor (simplified)
+    // Assumes moderate damping ratio of 0.05
+    const dampingRatio = 0.05
+    let dynamicFactor = 1.0
+    
+    if (frequencyRatio < 0.7) {
+      // Below resonance - minimal amplification
+      dynamicFactor = 1.0 + 0.1 * frequencyRatio
+    } else if (frequencyRatio < 1.5) {
+      // Near resonance - significant amplification
+      dynamicFactor = 1.0 / (2 * dampingRatio) // Simplified resonance amplification
+      dynamicFactor = Math.min(dynamicFactor, 5.0) // Cap at 5x
+    } else {
+      // Above resonance - mass-controlled region
+      dynamicFactor = 1.0 + 0.2 / Math.pow(frequencyRatio, 2)
+    }
+    
+    return Math.max(dynamicFactor, 1.0)
   }
 
   /**

@@ -3,6 +3,7 @@ import { useAppContext } from '../hooks/useAppContext'
 import { calculateParameters, type CalculationResult } from '../data/calculations'
 import { getMaterialById } from '../data/materials'
 import DepthOfCutTooltip from './DepthOfCutTooltip'
+import DeflectionTooltip from './DeflectionTooltip'
 
 export default function ParametersTable() {
   const { state, toggleParameterLock } = useAppContext()
@@ -275,6 +276,11 @@ Industry-validated calculations for CNC machining operations
                   <th title="Percentage of spindle power being used">Spindle Power<br />(%)</th>
                   <th title="Cutting force required - affects tool deflection and machine loading">Cutting Force<br />({units === 'metric' ? 'N' : 'lbf'})</th>
                   <th title="Surface speed of the tool cutting edge">Surface Speed<br />({units === 'metric' ? 'm/min' : 'ft/min'})</th>
+                  <th>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span title="Total tool deflection including dynamic effects">Tool Deflection<br />({units === 'metric' ? 'mm' : 'in'})</span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -315,10 +321,25 @@ Industry-validated calculations for CNC machining operations
                       </td>
                       <td>{calc.cuttingForce}</td>
                       <td>{calc.surfaceSpeed}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ color: calc.toolDeflection > (units === 'metric' ? 0.02 : 0.0008) ? '#e74c3c' : '#27ae60' }}>
+                            {calc.toolDeflection}
+                          </span>
+                          <DeflectionTooltip
+                            deflectionAnalysis={calc.deflectionAnalysis}
+                            maxDepthAnalysis={calc.maxDepthAnalysis}
+                            toolConfig={toolConfig}
+                            material={getMaterialForCalculation(calc)}
+                            units={units}
+                            cuttingForce={calc.cuttingForce}
+                          />
+                        </div>
+                      </td>
                     </tr>
                     {expandedRows.has(index) && (
                       <tr className="expanded-row">
-                        <td colSpan={12}>
+                        <td colSpan={13}>
                           <div style={{ padding: '15px', backgroundColor: '#1a1a1a', border: '1px solid #333' }}>
                             <h4>📊 Professional Machining Analysis</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '15px' }}>
@@ -327,6 +348,8 @@ Industry-validated calculations for CNC machining operations
                                 <div style={{ marginTop: '8px', fontSize: '14px' }}>
                                   <div>Chip Thickness: <span style={{ color: '#4a90e2' }}>{calc.chipThickness} {units === 'metric' ? 'mm' : 'in'}</span></div>
                                   <div>Tool Deflection: <span style={{ color: calc.toolDeflection > 0.01 ? '#e74c3c' : '#27ae60' }}>{calc.toolDeflection} {units === 'metric' ? 'mm' : 'in'}</span></div>
+                                  <div>Natural Frequency: <span style={{ color: '#9b59b6' }}>{calc.deflectionAnalysis.naturalFrequency} Hz</span></div>
+                                  <div>Dynamic Factor: <span style={{ color: calc.deflectionAnalysis.dynamicFactor > 2 ? '#e74c3c' : '#27ae60' }}>{calc.deflectionAnalysis.dynamicFactor}x</span></div>
                                   <div>Estimated Tool Life: <span style={{ color: '#f39c12' }}>{calc.toolLife} minutes</span></div>
                                 </div>
                               </div>
@@ -344,6 +367,16 @@ Industry-validated calculations for CNC machining operations
                                   <div>Heat Generation: <span style={{ color: calc.heatGeneration > 100 ? '#e74c3c' : '#27ae60' }}>{calc.heatGeneration} W</span></div>
                                   <div>Chatter Frequency: <span style={{ color: '#3498db' }}>{calc.chatterFrequency} Hz</span></div>
                                   <div>Power Utilization: <span style={{ color: calc.spindlePower > 80 ? '#e74c3c' : '#27ae60' }}>{calc.spindlePower}%</span></div>
+                                </div>
+                              </div>
+                              <div style={{ background: '#252525', padding: '12px', borderRadius: '4px', border: '1px solid #444' }}>
+                                <strong>📏 Maximum Depth Analysis</strong>
+                                <div style={{ marginTop: '8px', fontSize: '14px' }}>
+                                  <div>Max Depth Limit: <span style={{ color: '#e74c3c' }}>{calc.maxDepthAnalysis.overallLimit} {units === 'metric' ? 'mm' : 'in'}</span></div>
+                                  <div>Limiting Factor: <span style={{ color: '#f39c12' }}>{calc.maxDepthAnalysis.limitingFactor}</span></div>
+                                  <div>Safety Margin: <span style={{ color: calc.depthOfCut / calc.maxDepthAnalysis.overallLimit > 0.8 ? '#e74c3c' : '#27ae60' }}>
+                                    {Math.round((1 - calc.depthOfCut / calc.maxDepthAnalysis.overallLimit) * 100)}%
+                                  </span></div>
                                 </div>
                               </div>
                             </div>
