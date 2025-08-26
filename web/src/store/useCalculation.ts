@@ -42,19 +42,8 @@ export function useCalculation() {
       store.setError(undefined)
       
       // Perform the calculation
-      // Note: calculate() is currently a placeholder that throws an error
-      // For now, we'll catch this and show a message indicating it's not implemented
-      try {
-        const results = calculate()
-        store.setResults(results)
-      } catch (error) {
-        // Expected error since calculate() is not implemented yet
-        if (error instanceof Error && error.message.includes('not yet implemented')) {
-          store.setError('Calculation engine not yet implemented - coming in future iterations')
-        } else {
-          throw error // Re-throw unexpected errors
-        }
-      }
+      const results = calculate(validatedInputs)
+      store.setResults(results)
       
     } catch (error) {
       console.error('Calculation error:', error)
