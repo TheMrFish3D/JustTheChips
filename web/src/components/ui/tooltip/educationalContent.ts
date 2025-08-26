@@ -184,7 +184,7 @@ export const educationalContent: Record<string, EducationalContent> = {
     description: 'The machine\'s resistance to deflection under cutting forces. Varies significantly between machine types.',
     whyItMatters: 'Determines achievable accuracy, surface finish quality, and maximum safe cutting parameters.',
     effects: {
-      optimal: '3018 CNC: Light cuts only. PrintNC: Moderate cuts possible. Entry VMC: Heavy cuts achievable.'
+      optimal: 'Lowrider v3 Small (≤800mm): Moderate cuts possible. Lowrider v3 Medium (800-1500mm): Conservative cuts recommended. Lowrider v3 Large (>1500mm): Light cuts only. PrintNC: Heavy cuts achievable. Entry VMC: Maximum performance.'
     },
     troubleshooting: [
       {

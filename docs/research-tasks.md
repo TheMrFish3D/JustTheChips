@@ -4,17 +4,29 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Machine Rigidity Research Tasks
 
-### 1. Lowrider v3 CNC Rigidity Analysis  
+### 1. 3018 CNC Machine Rigidity Analysis
 **Priority:** High
 **Estimated Effort:** 2-3 hours
-**Description:** Research and model the structural rigidity of Lowrider v3 CNC machines
-- Analyze torsion box table construction impact on rigidity
-- Study rolling/sliding bearing system effects
-- Research spindle mount options and their rigidity
-- Find community measurements and testing data
-- Develop rigidity factors for different table sizes
+**Description:** Research and model the structural rigidity of 3018 CNC machines
+- Research frame construction (aluminum extrusion vs steel)
+- Analyze spindle mount rigidity
+- Study axis backlash and compliance characteristics
+- Find existing rigidity measurements or studies
+- Develop rigidity factor calculations for different 3018 variants
 
-### 2. Queenbee Pro CNC Rigidity Analysis
+### 2. ~~Lowrider v3 CNC Rigidity Analysis~~ **COMPLETED**
+**Priority:** High
+**Estimated Effort:** 2-3 hours  
+**Status:** Completed - See `docs/research/lowrider-v3-rigidity-analysis.md`
+**Description:** Research and model the structural rigidity of Lowrider v3 CNC machines
+- ✅ Analyzed torsion box table construction impact on rigidity
+- ✅ Studied rolling/sliding bearing system effects
+- ✅ Researched spindle mount options and their rigidity
+- ✅ Found community measurements and testing data
+- ✅ Developed rigidity factors for different table sizes
+- ✅ Updated machine data with size-specific variants
+
+### 3. Queenbee Pro CNC Rigidity Analysis
 **Priority:** Medium
 **Estimated Effort:** 2 hours  
 **Description:** Research and model the structural rigidity of Queenbee Pro machines
@@ -23,7 +35,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Research spindle mounting rigidity
 - Compare with other hobby machines in similar class
 
-### 3. PrintNC CNC Rigidity Analysis
+### 4. PrintNC CNC Rigidity Analysis
 **Priority:** High
 **Estimated Effort:** 3-4 hours
 **Description:** Research and model the structural rigidity of PrintNC machines
@@ -33,7 +45,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Find community rigidity testing data
 - Develop size-dependent rigidity factors
 
-### 4. Entry VMC and Benchtop Mill Rigidity Research
+### 5. Entry VMC and Benchtop Mill Rigidity Research
 **Priority:** Medium
 **Estimated Effort:** 2-3 hours
 **Description:** Research rigidity characteristics of entry-level VMCs and benchtop mills
@@ -42,7 +54,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Research spindle integration rigidity
 - Compare with hobby CNC machines
 
-### 5. Custom Machine Rigidity Estimation Framework
+### 6. Custom Machine Rigidity Estimation Framework
 **Priority:** High
 **Estimated Effort:** 4-5 hours
 **Description:** Develop framework for estimating custom machine rigidity
@@ -53,7 +65,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Educational Content Research Tasks
 
-### 6. CNC Parameter Education Research
+### 7. CNC Parameter Education Research
 **Priority:** Medium
 **Estimated Effort:** 3-4 hours
 **Description:** Research educational content for CNC parameters
@@ -62,7 +74,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Document chip load relationships with material removal and tool wear
 - Create troubleshooting guides for common issues
 
-### 7. Hobby Machine Limitations Research
+### 8. Hobby Machine Limitations Research
 **Priority:** Medium  
 **Estimated Effort:** 2-3 hours
 **Description:** Research specific limitations and considerations for hobby machines
@@ -73,7 +85,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 
 ## Cutting Parameter Research Tasks
 
-### 8. Hobby Machine Optimal Parameters Research
+### 9. Hobby Machine Optimal Parameters Research
 **Priority:** Medium
 **Estimated Effort:** 3-4 hours
 **Description:** Research optimal cutting parameters for hobby machines
@@ -82,7 +94,7 @@ This file tracks research tasks needed for the visual overhaul and enhanced func
 - Analyze tool deflection limits for hobby applications
 - Document parameter ranges for different machine classes
 
-### 9. Power Curve Validation Research
+### 10. Power Curve Validation Research
 **Priority:** Low
 **Estimated Effort:** 2-3 hours
 **Description:** Validate and improve spindle power curve calculations
