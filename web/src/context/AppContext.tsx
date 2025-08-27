@@ -49,7 +49,13 @@ const defaultState: AppState = {
     flutes: 2,
     stickout: 15,
     material: 'carbide',
-    coating: 'tin'
+    coating: 'tin',
+    // Tool deflection analysis specific fields
+    holderType: 'collet',
+    projectionLength: 12,    // Typical projection less than total stickout
+    coreDiameter: 4.2,       // Calculated based on flute geometry
+    helixAngle: 30,          // Typical endmill helix angle
+    runoutTolerance: 0.005   // Typical runout for good quality setup
   },
   selectedMaterials: ['aluminum-6061'],
   selectedOperations: [
