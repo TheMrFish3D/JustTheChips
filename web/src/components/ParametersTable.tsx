@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAppContext } from '../hooks/useAppContext'
-import { calculateParameters, type CalculationResult } from '../data/calculations'
+import { calculateParameters, type CalculationResult, type OperationConfig } from '../data/calculations'
 import { getMaterialById } from '../data/materials'
 import DepthOfCutTooltip from './DepthOfCutTooltip'
 import DeflectionTooltip from './DeflectionTooltip'
@@ -19,7 +19,7 @@ export default function ParametersTable() {
     const isFinishing = depthRatio < 0.2 // Less than 20% of diameter suggests finishing
     
     return {
-      type: calc.operation as any,
+      type: calc.operation as OperationConfig['type'],
       finish: isFinishing ? 'finishing' as const : 'roughing' as const
     }
   }

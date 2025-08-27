@@ -41,6 +41,13 @@ export interface OperationConfig {
   finish: 'roughing' | 'finishing'
 }
 
+export interface ToolMaterialProperties {
+  elasticModulus: number
+  shearModulus: number
+  density: number
+  tensileStrength: number
+}
+
 export interface CalculationResult {
   material: string
   operation: string
@@ -74,6 +81,7 @@ export interface CalculationResult {
     naturalFrequency: number     // Hz - tool natural frequency
     effectiveDiameter: number    // mm or inches - considering flute depth
     limitingFactor: string       // what limits maximum depth of cut
+    holderStiffnessFactor: number // tool holder stiffness factor
   }
   // Maximum depth of cut analysis
   maxDepthAnalysis: {
@@ -217,7 +225,8 @@ export class MachiningCalculator {
         dynamicFactor: Math.round(deflectionAnalysis.dynamicFactor * 100) / 100,
         naturalFrequency: Math.round(deflectionAnalysis.naturalFrequency),
         effectiveDiameter: Math.round(deflectionAnalysis.effectiveDiameter * 100) / 100,
-        limitingFactor: 'analysis' // Will be set by comprehensive analysis
+        limitingFactor: 'analysis', // Will be set by comprehensive analysis
+        holderStiffnessFactor: Math.round(deflectionAnalysis.holderStiffnessFactor * 100) / 100
       },
       // Maximum depth of cut analysis
       maxDepthAnalysis: {
@@ -523,7 +532,7 @@ export class MachiningCalculator {
     
     // Use iterative approach to find maximum depth that keeps deflection within limits
     const diameter = toolConfig.diameter
-    let testDepth = diameter * 0.1 // Start conservative
+    const testDepth = diameter * 0.1 // Start conservative
     const increment = diameter * 0.01
     let maxSafeDepth = testDepth
     
@@ -561,6 +570,7 @@ export class MachiningCalculator {
    */
   private calculateStrengthLimitedDepth(
     toolConfig: ToolConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _operation: OperationConfig
   ): number {
     const diameter = toolConfig.diameter
@@ -1058,7 +1068,7 @@ export class MachiningCalculator {
    */
   private calculateToolNaturalFrequency(
     toolConfig: ToolConfig, 
-    materialProps: any
+    materialProps: ToolMaterialProperties
   ): number {
     const diameter = this.getEffectiveToolDiameter(toolConfig)
     const projectionLength = toolConfig.projectionLength
@@ -1085,7 +1095,7 @@ export class MachiningCalculator {
    * Calculate dynamic amplification factor for rotating cutting tools
    * Different from generic beam vibration
    */
-  private getToolDynamicAmplificationFactor(toolConfig: ToolConfig, materialProps: any): number {
+  private getToolDynamicAmplificationFactor(toolConfig: ToolConfig, materialProps: ToolMaterialProperties): number {
     const naturalFreq = this.calculateToolNaturalFrequency(toolConfig, materialProps)
     
     // Estimate actual cutting speed based on tool diameter and typical practices
