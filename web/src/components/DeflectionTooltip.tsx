@@ -12,6 +12,7 @@ interface DeflectionTooltipProps {
     naturalFrequency: number
     effectiveDiameter: number
     limitingFactor: string
+    holderStiffnessFactor: number
   }
   maxDepthAnalysis: {
     powerLimit: number
@@ -167,7 +168,7 @@ export default function DeflectionTooltip({
                 δ_tool = <strong>{deflectionAnalysis.lateralDeflection} {lengthUnit}</strong>
               </div>
               <div style={{ marginLeft: '15px', fontSize: '11px', color: '#ccc', marginTop: '4px' }}>
-                Where K_holder = {(deflectionAnalysis as any).holderStiffnessFactor || 'N/A'} (tool holder stiffness factor)
+                Where K_holder = {deflectionAnalysis.holderStiffnessFactor || 'N/A'} (tool holder stiffness factor)
               </div>
             </div>
 
@@ -175,7 +176,7 @@ export default function DeflectionTooltip({
               <strong>2. Tool Holder Effects:</strong>
               <div style={{ marginLeft: '15px' }}>
                 Holder Type: <strong>{toolConfig.holderType}</strong><br/>
-                Stiffness Factor: <strong>{(deflectionAnalysis as any).holderStiffnessFactor || 'N/A'}</strong><br/>
+                Stiffness Factor: <strong>{deflectionAnalysis.holderStiffnessFactor || 'N/A'}</strong><br/>
                 Projection Length: <strong>{toolConfig.projectionLength} {lengthUnit}</strong> (vs {toolConfig.stickout} {lengthUnit} total stickout)
               </div>
             </div>
