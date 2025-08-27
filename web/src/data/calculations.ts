@@ -433,10 +433,9 @@ export class MachiningCalculator {
     const strengthLimitSafe = strengthLimit / safetyFactor
     const stabilityLimitSafe = stabilityLimit / safetyFactor
     
-    // Overall limit is the most restrictive
+    // Overall limit is the most restrictive (excluding deflection per user request)
     const overallLimit = Math.min(
       powerLimitSafe,
-      deflectionLimitSafe, 
       strengthLimitSafe,
       stabilityLimitSafe,
       rigidityLimit
@@ -451,7 +450,6 @@ export class MachiningCalculator {
       overallLimit,
       limitingFactor: this.identifyLimitingFactor({
         power: powerLimitSafe,
-        deflection: deflectionLimitSafe,
         strength: strengthLimitSafe,
         stability: stabilityLimitSafe,
         rigidity: rigidityLimit
@@ -650,7 +648,7 @@ export class MachiningCalculator {
    */
   private identifyLimitingFactor(limits: {
     power: number
-    deflection: number
+    deflection?: number
     strength: number
     stability: number
     rigidity: number
